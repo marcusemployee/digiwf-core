@@ -164,6 +164,9 @@
                         </executions>
                         <configuration>
                             <doclint>none</doclint>
+                            <sourceFileIncludes>
+                                <sourceFileInclude>**/*.java</sourceFileInclude>
+                            </sourceFileIncludes>
                         </configuration>
                     </plugin>
 

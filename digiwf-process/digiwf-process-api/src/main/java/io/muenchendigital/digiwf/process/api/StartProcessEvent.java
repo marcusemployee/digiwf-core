@@ -15,9 +15,15 @@ import java.util.Map;
 @NoArgsConstructor
 public class StartProcessEvent implements StartProcess {
 
+    /**
+     * Key of the process
+     */
     @NotBlank
     private String key;
 
+    /**
+     * Data that is set
+     */
     private Map<String, Object> data;
 
 }
