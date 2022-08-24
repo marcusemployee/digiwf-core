@@ -78,6 +78,13 @@ public class JsonSerializerImpl implements JsonSerializer {
         return this.deepMerge(source, target).toMap();
     }
 
+    /**
+     * Returns all root keys that are in the json schema.
+     *
+     * @param schema
+     * @param filterReadOnly
+     * @return
+     */
     @Override
     public Set<String> extractRootKeys(final Schema schema, final Boolean filterReadOnly) {
         if (schema instanceof ObjectSchema) {
@@ -99,7 +106,7 @@ public class JsonSerializerImpl implements JsonSerializer {
         if (schema instanceof CombinedSchema) {
             final CombinedSchema combinedSchema = (CombinedSchema) schema;
             return combinedSchema.getSubschemas().stream()
-                    .map(this::extractRootKeys)
+                    .map(obj -> this.extractRootKeys(obj, filterReadOnly))
                     .flatMap(Set::stream)
                     .collect(Collectors.toSet());
         }
