@@ -29,11 +29,24 @@ public class StartProcessService {
      *
      * @param processKey key of the process
      * @param payload    Data to start the process
-     * @return
+     * @return the emit result
      */
     public boolean startProcess(final String processKey, final Map<String, Object> payload) {
+        return startProcess(processKey, null, payload);
+    }
+
+    /**
+     * Starts a process with the given payload and file context.
+     *
+     * @param processKey key of the process
+     * @param fileContext file context for document storage
+     * @param payload    Data to start the process
+     * @return the emit result
+     */
+    public boolean startProcess(final String processKey, final String fileContext, final Map<String, Object> payload) {
         final StartProcessEvent startProcessEvent = StartProcessEvent.builder()
                 .key(processKey)
+                .fileContext(fileContext)
                 .data(payload)
                 .build();
 
