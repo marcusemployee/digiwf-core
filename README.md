@@ -32,7 +32,10 @@
 
 The documentation project is built with technologies we use in our projects:
 
-* *write here the list of used technologies*
+* Camunda
+* Spring Boot
+* Vue.js
+* JSON Schema
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -50,13 +53,20 @@ See the [open issues](#) for a full list of proposed features (and known issues)
 
 *how can i start and fly this project*
 
-Update version: ``mvn versions:set -DnewVersion='0.10.1-SNAPSHOT'``
-
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 ## Documentation
 
-*what insights do you have to tell*
+### Building a new maven version
+
+- execute `Update version: ``mvn versions:set -DnewVersion='0.10.1-SNAPSHOT'``
+- create a new tag with `core_` prefix
+- `-SNAPSHOT` will be removed automatically by the pipeline
+
+### Building a new app library version
+
+- execute `npm run versioning` in the digiwf-apps folder
+- create a new tag with `apps_` prefix
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
