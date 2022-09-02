@@ -6,7 +6,6 @@ import {fileURLToPath, URL} from "url";
 export default defineConfig({
     plugins: [],
     build: {
-        target: 'esnext',
         lib: {
             entry: 'src/index.ts',
             name: 'digiwf-engine-api-internal',

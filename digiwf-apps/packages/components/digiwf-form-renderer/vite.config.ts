@@ -8,7 +8,6 @@ export default defineConfig({
         createVuePlugin(),
     ],
     build: {
-        target: 'esnext',
         lib: {
             entry: 'src/index.ts',
             name: 'digiwf-form-renderer',

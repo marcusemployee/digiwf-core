@@ -23,7 +23,6 @@ export default defineConfig({
         },
     },
     build: {
-        target: 'esnext',
         lib: {
             entry: 'src/index.ts',
             name: 'digiwf-form-renderer',
