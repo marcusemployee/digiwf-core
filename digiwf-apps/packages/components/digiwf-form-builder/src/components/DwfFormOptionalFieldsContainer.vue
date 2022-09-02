@@ -82,7 +82,7 @@
 <script lang="ts">
 import {generateUUID} from "@/utils/UUIDGenerator";
 import {defineComponent, inject, set} from "@vue/composition-api";
-import {FormBuilderSettings} from "@dh-nx-test/digiwf-form-builder-settings";
+import {FormBuilderSettings} from "@muenchen/digiwf-form-builder-settings";
 
 export default defineComponent({
   props: ['fieldKey', 'value'],

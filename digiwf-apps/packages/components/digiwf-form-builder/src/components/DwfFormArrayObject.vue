@@ -57,11 +57,18 @@
 
 <script lang="ts">
 import {computed, defineComponent, inject} from "@vue/composition-api";
-import {FormBuilderSettings} from "@dh-nx-test/digiwf-form-builder-settings";
+import {FormBuilderSettings} from "@muenchen/digiwf-form-builder-settings";
 
 export default defineComponent({
+  props: ['fieldKey', 'value'],
   emits: ['input', 'remove'],
   setup(props, {emit}) {
+    const dragOptions = {
+      animation: 200,
+      group: "field",
+      disabled: false,
+      ghostClass: "ghost"
+    };
 
     const settings = inject<FormBuilderSettings>("builderSettings")
 
@@ -112,6 +119,7 @@ export default defineComponent({
     return {
       settings,
       properties,
+      dragOptions,
       input,
       removed,
       icon,

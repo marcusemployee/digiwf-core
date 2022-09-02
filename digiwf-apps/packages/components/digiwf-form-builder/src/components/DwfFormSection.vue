@@ -109,8 +109,8 @@
 <script lang="ts">
 import {generateUUID} from "@/utils/UUIDGenerator";
 import {defineComponent, inject, set} from "@vue/composition-api";
-import {FormBuilderSettings} from "@dh-nx-test/digiwf-form-builder-settings";
-import {Container, Section} from "@dh-nx-test/digiwf-form-renderer";
+import {FormBuilderSettings} from "@muenchen/digiwf-form-builder-settings";
+import {Container, Section} from "@muenchen/digiwf-form-renderer";
 
 export default defineComponent({
   props: ['value'],

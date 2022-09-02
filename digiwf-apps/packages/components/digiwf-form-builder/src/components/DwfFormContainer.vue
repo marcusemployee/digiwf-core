@@ -56,7 +56,7 @@
 
 <script lang="ts">
 import {computed, defineComponent, inject} from "@vue/composition-api";
-import {FormFieldContainer} from "@dh-nx-test/digiwf-form-renderer";
+import {FormFieldContainer} from "@muenchen/digiwf-form-renderer";
 
 
 export default defineComponent({

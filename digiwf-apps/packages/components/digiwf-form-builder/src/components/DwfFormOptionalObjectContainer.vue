@@ -119,7 +119,7 @@ export default defineComponent({
       }
       const key = generateUUID();
       set(container, "key", key);
-      input(this.value);
+      input(props.value);
       return container.key;
     }
 
@@ -135,12 +135,12 @@ export default defineComponent({
     }
 
     const onItemChanged = (container: any) => {
-      for (let i = 0; i < this.value.oneOf.length; i++) {
-        if (this.value.oneOf[i].key === container.key) {
-          set(this.value.oneOf, i, container);
-          this.input({
-            key: this.fieldKey,
-            ...this.value
+      for (let i = 0; i < props.value.oneOf.length; i++) {
+        if (props.value.oneOf[i].key === container.key) {
+          set(props.value.oneOf, i, container);
+          input({
+            key: props.fieldKey,
+            ...props.value
           });
           return;
         }
