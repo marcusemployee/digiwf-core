@@ -49,7 +49,7 @@ export default defineComponent({
         return (!!v && v !== '') || 'Dieses Feld ist ein Pflichfeld';
       },
       requiredObject: function (v: { amount: number }) {
-        return (!!v && v.amount < 1) || 'Dieses Feld ist ein Pflichfeld';
+        return (!!v && v.amount >= 1) || 'Dieses Feld ist ein Pflichfeld';
       }
     };
     currentValue.value = props.value;
