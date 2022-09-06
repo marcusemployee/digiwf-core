@@ -1,25 +1,21 @@
 <template>
   <div>
-    <v-form ref="form">
-      <Jsf @input="input" v-model="currentValue" :schema="currentSchema" :options="currentOptions">
-        <template v-for="(index, name) in $scopedSlots" v-slot:[name]="data">
-          <slot :name="name" v-bind="data"></slot>
-        </template>
-      </Jsf>
-    </v-form>
+    <Jsf @input="input" v-model="currentValue" :schema="currentSchema" :options="currentOptions">
+      <template v-for="(index, name) in $scopedSlots" v-slot:[name]="data">
+        <slot :name="name" v-bind="data"></slot>
+      </template>
+    </Jsf>
   </div>
 </template>
 
 <script lang="ts">
 //@ts-ignore
 import deepmerge from "deepmerge";
-import {VBtn, VForm} from "vuetify/lib/components";
 import {computed, defineComponent, ref} from "vue";
 
 export default defineComponent({
   props: ['options', 'buttonText', 'value', 'schema'],
   emits: ['input'],
-  components: {VBtn, VForm},
   setup(props, {emit}) {
 
     const currentValue = ref({});
@@ -82,7 +78,6 @@ export default defineComponent({
       input,
       currentOptions
     }
-
   }
 })
 
