@@ -42,7 +42,7 @@ export default defineComponent({
     }
     const rules = {
       required: function (v: any) {
-        return (!!v && v !== '') || 'Dieses Feld ist ein Pflichfeld';
+        return (!!v && v !== '' || v === 0) || 'Dieses Feld ist ein Pflichfeld';
       },
       requiredObject: function (v: any) {
         return (!!v && v.length >= 1) || 'Dieses Feld ist ein Pflichfeld';
