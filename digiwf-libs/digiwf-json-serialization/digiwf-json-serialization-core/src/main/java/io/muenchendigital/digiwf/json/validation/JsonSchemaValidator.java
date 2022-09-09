@@ -5,11 +5,15 @@
 package io.muenchendigital.digiwf.json.validation;
 
 import org.everit.json.schema.Schema;
+import org.everit.json.schema.ValidationException;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.everit.json.schema.regexp.RE2JRegexpFactory;
 import org.json.JSONObject;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Json Schema Validator
@@ -23,7 +27,12 @@ public class JsonSchemaValidator {
      * @param data   data that is validated
      */
     public void validate(final Map<String, Object> schema, final Map<String, Object> data) {
-        this.validate(schema, new JSONObject(data));
+        try {
+            this.validate(schema, new JSONObject(data));
+        } catch (ValidationException validationException) {
+            final List<ValidationErrorInformation> errorInformation = this.extractValidationErrorInformation(validationException);
+            throw new DigiWFValidationException(errorInformation);
+        }
     }
 
     /**
@@ -35,6 +44,27 @@ public class JsonSchemaValidator {
     public void validate(final String schema, final Map<String, Object> data) {
         final Schema schemaObj = this.createSchema(new JSONObject(schema));
         schemaObj.validate(new JSONObject(data));
+    }
+
+    /**
+     * Extract root cause exception error information
+     *
+     * @param validationException Validation Exception
+     * @return Extracted validation error information
+     */
+    public List<ValidationErrorInformation> extractValidationErrorInformation(final ValidationException validationException) {
+        final List<ValidationErrorInformation> errors = validationException.getCausingExceptions()
+                .stream().map(this::extractValidationErrorInformation)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+
+        if (validationException.getSchemaLocation() == null || !validationException.getCausingExceptions().isEmpty()) {
+            return errors;
+        }
+
+        final ValidationErrorInformation validationErrorInformation = new ValidationErrorInformation(validationException.getPointerToViolation(), validationException.getSchemaLocation(), validationException.getViolatedSchema());
+        errors.add(validationErrorInformation);
+        return errors;
     }
 
 

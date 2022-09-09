@@ -2,8 +2,8 @@ package io.muenchendigital.digiwf.json.validation;
 
 import io.muenchendigital.digiwf.json.factory.JsonSchemaFactory;
 import io.muenchendigital.digiwf.json.serialization.JsonSerializationService;
+import org.everit.json.schema.BooleanSchema;
 import org.everit.json.schema.Schema;
-import org.everit.json.schema.ValidationException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,11 +44,11 @@ public class JsonValidatorTest {
                 "stringProp1", "fdsfsdafsdafadsfsadfsdafdfdsfsdafsdafadsfsadfsdafd"
         );
         final String rawSchema = this.getSchemaString("/schema/validation/simpleSchema.json");
-        final ValidationException exception = assertThrows(ValidationException.class, () -> {
+        final DigiWFValidationException exception = assertThrows(DigiWFValidationException.class, () -> {
             this.validationService.validate(new JSONObject(rawSchema).toMap(), data);
         });
 
-        assertThat(exception.getMessage()).isEqualTo("#/stringProp1: string [fdsfsdafsdafadsfsadfsdafdfdsfsdafsdafadsfsadfsdafd] does not match pattern ^.{1,30}$");
+        assertThat(exception.getMessage()).isEqualTo("ValidationErrorInformation(pointer=#/stringProp1, schemaPath=#/properties/stringProp1, violatedSchema={\"type\":\"string\",\"pattern\":\"^.{1,30}$\"})");
     }
 
     @Test
@@ -71,11 +71,11 @@ public class JsonValidatorTest {
                 "stringProp1", "fdsfsdafsdafadsfsadfsdafd"
         );
         final String rawSchema = this.getSchemaString("/schema/validation/simpleSchema.json");
-        final ValidationException exception = assertThrows(ValidationException.class, () -> {
+        final DigiWFValidationException exception = assertThrows(DigiWFValidationException.class, () -> {
             this.validationService.validate(new JSONObject(rawSchema).toMap(), data);
         });
 
-        assertThat(exception.getMessage()).isEqualTo("#: required key [numberProp1] not found");
+        assertThat(exception.getMessage()).isEqualTo("ValidationErrorInformation(pointer=#, schemaPath=#, violatedSchema={\"additionalProperties\":false,\"required\":[\"numberProp1\"],\"properties\":{\"numberProp1\":{\"type\":\"number\"},\"stringProp1\":{\"type\":\"string\",\"pattern\":\"^.{1,30}$\"}}})");
     }
 
     @Test
@@ -142,6 +142,41 @@ public class JsonValidatorTest {
                 "objekt1", Map.of("objektTextfeld", "abc")
         );
         schema.validate(new JSONObject(data));
+    }
+
+    @Test
+    public void checkValidationErrorOfComplexSchema() throws URISyntaxException, IOException {
+        final Map<String, Object> data = Map.of(
+                "stringProp1", "fdsfsdafsdafadsfsadfsdafd",
+                "selection", "test3"
+        );
+        final String rawSchema = this.getSchemaString("/schema/validation/complexSchema.json");
+        final DigiWFValidationException exception = assertThrows(DigiWFValidationException.class, () -> {
+            this.validationService.validate(new JSONObject(rawSchema).toMap(), data);
+        });
+
+        assertThat(exception.getValidationErrorInformation().size()).isEqualTo(2);
+    }
+
+    @Test
+    public void checkValidationErrorOfObjectSchema() throws URISyntaxException, IOException {
+        final Map<String, Object> data = Map.of(
+                "textarea", "100",
+                "textfeld", "100",
+                "objekt1", Map.of(
+                        "objektTextfeld", "fdsfsdafsdafadsfsadfsdafd",
+                        "objektSchalter", "fsdfsad"
+                )
+        );
+
+        final String rawSchema = this.getSchemaString("/schema/validation/complexObjectSchema.json");
+        final DigiWFValidationException exception = assertThrows(DigiWFValidationException.class, () -> {
+            this.validationService.validate(new JSONObject(rawSchema).toMap(), data);
+        });
+
+        assertThat(exception.getValidationErrorInformation().size()).isEqualTo(1);
+        assertThat(exception.getValidationErrorInformation().get(0).getViolatedSchema().getClass()).isEqualTo(BooleanSchema.class);
+
     }
 
 
