@@ -62,7 +62,12 @@ public class JsonSchemaValidator {
             return errors;
         }
 
-        final ValidationErrorInformation validationErrorInformation = new ValidationErrorInformation(validationException.getPointerToViolation(), validationException.getSchemaLocation(), validationException.getViolatedSchema());
+        final ValidationErrorInformation validationErrorInformation = new ValidationErrorInformation(
+                validationException.getPointerToViolation(),
+                validationException.getSchemaLocation(),
+                validationException.getViolatedSchema(),
+                validationException.getMessage()
+        );
         errors.add(validationErrorInformation);
         return errors;
     }
