@@ -40,4 +40,4 @@ jobs:
         with:
           context: ./packages/apps/digiwf-tasklist
           push: true
-          tags: itatm/digiwf-tasklist:${{ env.RELEASE_VERSION }}
+          tags: itatm/digiwf-tasklist:${{ env.RELEASE_VERSION }}-SNAPSHOT
