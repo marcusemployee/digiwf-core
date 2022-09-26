@@ -17,8 +17,7 @@ export class FetchUtils {
   }
 
   /**
-   * Liefert eine default POST-Config für fetch
-   * @param body Optional zu übertragender Body
+   * Liefert eine default DELETE-Config für fetch
    */
   // eslint-disable-next-line
   static getDELETEConfig(): RequestInit {
@@ -30,6 +29,22 @@ export class FetchUtils {
       redirect: "manual"
     };
   }
+
+    /**
+     * Liefert eine default POST-Config für fetch
+     * @param body Optional zu übertragender Body
+     */
+    // eslint-disable-next-line
+    static getPOSTConfig(body: any): RequestInit {
+        return {
+            method: 'POST',
+            body: body ? JSON.stringify(body) : undefined,
+            headers: FetchUtils.getHeaders(),
+            mode: 'cors',
+            credentials: 'same-origin',
+            redirect: "manual"
+        };
+    }
 
   static getAxiosConfig(fetchConfig: RequestInit): Configuration {
     const cfg = new Configuration();
