@@ -17,7 +17,8 @@
     "newLine": "lf",
     "types": [
       "vue",
-      "vuetify"
+      "vuetify",
+      "vite/client"
     ],
     "paths": {
       "@/*": [
