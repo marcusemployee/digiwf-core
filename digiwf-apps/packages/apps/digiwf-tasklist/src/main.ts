@@ -14,6 +14,15 @@ import Vue2PdfEmbed from 'vue-pdf-embed/dist/vue2-pdf-embed.js';
 import './plugins/vjsf';
 import './plugins/digiwf-forms';
 import VueMarkdown from 'vue-markdown';
+import FormBase from "vuetify-form-base";
+import BaseMarkdownOutput from "./components/form/BaseMarkdownOutput.vue";
+import BaseDocumentInput from "./components/form/BaseDocumentInput.vue";
+import BaseAlwDocumentInput from "./components/form/BaseAlwDocumentInput.vue";
+import CsvOutput from "./components/form/CsvOutput.vue";
+import PdfOutput from "./components/form/PdfOutput.vue";
+import FileOutput from "./components/form/FileOutput.vue";
+import ImageOutput from "./components/form/ImageOutput.vue";
+import BaseLdapInput from "./components/form/BaseLdapInput.vue";
 
 
 Vue.config.productionTip = false;
@@ -36,16 +45,6 @@ Vue.component('VMultiUserInput', VMultiUserInput);
 Vue.component('DwfFormRenderer', DwfFormRenderer);
 Vue.component('DwfMultiFileInput', DwfMultiFileInput);
 Vue.component('Vue2PdfEmbed', Vue2PdfEmbed);
-
-import FormBase from "vuetify-form-base";
-import BaseMarkdownOutput from "./components/form/BaseMarkdownOutput.vue";
-import BaseDocumentInput from "./components/form/BaseDocumentInput.vue";
-import BaseAlwDocumentInput from "./components/form/BaseAlwDocumentInput.vue";
-import CsvOutput from "./components/form/CsvOutput.vue";
-import PdfOutput from "./components/form/PdfOutput.vue";
-import FileOutput from "./components/form/FileOutput.vue";
-import ImageOutput from "./components/form/ImageOutput.vue";
-import BaseLdapInput from "./components/form/BaseLdapInput.vue";
 Vue.component('FormBase', FormBase);
 
 // highlight filter
