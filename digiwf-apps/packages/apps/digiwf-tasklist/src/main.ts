@@ -19,7 +19,7 @@ import VueMarkdown from 'vue-markdown';
 Vue.config.productionTip = false;
 
 // @ts-ignore
-Vue.use(VueMarkdown);
+Vue.component('VueMarkdown', VueMarkdown);
 Vue.component('VLdapInput', BaseLdapInput);
 Vue.component('VImageOutput', ImageOutput);
 Vue.component('VFileOutput', FileOutput);
