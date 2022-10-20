@@ -27,8 +27,7 @@ import BaseLdapInput from "./components/form/BaseLdapInput.vue";
 
 Vue.config.productionTip = false;
 
-// @ts-ignore
-Vue.component('VueMarkdown', VueMarkdown);
+Vue.component('TextHighlight', TextHighlight);
 Vue.component('VLdapInput', BaseLdapInput);
 Vue.component('VImageOutput', ImageOutput);
 Vue.component('VFileOutput', FileOutput);
@@ -37,7 +36,6 @@ Vue.component('VCsvOutput', CsvOutput);
 Vue.component('VAlwDocumentInput', BaseAlwDocumentInput);
 Vue.component('VDocumentInput', BaseDocumentInput);
 Vue.component('VMarkdownOutput', BaseMarkdownOutput);
-Vue.component('TextHighlight', TextHighlight);
 Vue.component('VDivider', VDivider);
 Vue.component('AppJsonForm', AppJsonForm);
 Vue.component('VUserInput', VUserInput);
