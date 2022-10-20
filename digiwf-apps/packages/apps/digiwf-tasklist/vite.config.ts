@@ -25,6 +25,9 @@ export default defineConfig({
     },
     minify: 'esbuild'
   },
+  define: {
+    global: {},
+  },
   resolve: {
     alias: {
       //@ts-ignore

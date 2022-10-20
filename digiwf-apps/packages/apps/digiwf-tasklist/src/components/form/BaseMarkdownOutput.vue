@@ -18,12 +18,10 @@
 <script lang="ts">
 import {Component, Prop, Vue} from "vue-property-decorator";
 import {VAutocomplete} from "vuetify/lib";
-import VueMarkdown from 'vue-markdown';
 
 @Component({
   components: {
-    VAutocomplete,
-    VueMarkdown
+    VAutocomplete
   }
 })
 export default class BaseMarkdownOutput extends Vue {

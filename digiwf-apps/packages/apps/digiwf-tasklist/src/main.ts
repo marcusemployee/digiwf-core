@@ -13,18 +13,21 @@ import {DwfMultiFileInput} from "@muenchen/digiwf-multi-file-input";
 import Vue2PdfEmbed from 'vue-pdf-embed/dist/vue2-pdf-embed.js';
 import './plugins/vjsf';
 import './plugins/digiwf-forms';
+import VueMarkdown from 'vue-markdown';
 
 
 Vue.config.productionTip = false;
 
-Vue.component('VLdapInput', () => import('@/components/form/BaseLdapInput.vue'));
-Vue.component('VImageOutput', () => import('@/components/form/ImageOutput.vue'));
-Vue.component('VFileOutput', () => import('@/components/form/FileOutput.vue'));
-Vue.component('VPdfOutput', () => import('@/components/form/PdfOutput.vue'));
-Vue.component('VCsvOutput', () => import('@/components/form/CsvOutput.vue'));
-Vue.component('VAlwDocumentInput', () => import('@/components/form/BaseAlwDocumentInput.vue'));
-Vue.component('VDocumentInput', () => import('@/components/form/BaseDocumentInput.vue'));
-Vue.component('VMarkdownOutput', () => import('@/components/form/BaseMarkdownOutput.vue'));
+// @ts-ignore
+Vue.use(VueMarkdown);
+Vue.component('VLdapInput', BaseLdapInput);
+Vue.component('VImageOutput', ImageOutput);
+Vue.component('VFileOutput', FileOutput);
+Vue.component('VPdfOutput', PdfOutput);
+Vue.component('VCsvOutput', CsvOutput);
+Vue.component('VAlwDocumentInput', BaseAlwDocumentInput);
+Vue.component('VDocumentInput', BaseDocumentInput);
+Vue.component('VMarkdownOutput', BaseMarkdownOutput);
 Vue.component('TextHighlight', TextHighlight);
 Vue.component('VDivider', VDivider);
 Vue.component('AppJsonForm', AppJsonForm);
@@ -33,6 +36,17 @@ Vue.component('VMultiUserInput', VMultiUserInput);
 Vue.component('DwfFormRenderer', DwfFormRenderer);
 Vue.component('DwfMultiFileInput', DwfMultiFileInput);
 Vue.component('Vue2PdfEmbed', Vue2PdfEmbed);
+
+import FormBase from "vuetify-form-base";
+import BaseMarkdownOutput from "./components/form/BaseMarkdownOutput.vue";
+import BaseDocumentInput from "./components/form/BaseDocumentInput.vue";
+import BaseAlwDocumentInput from "./components/form/BaseAlwDocumentInput.vue";
+import CsvOutput from "./components/form/CsvOutput.vue";
+import PdfOutput from "./components/form/PdfOutput.vue";
+import FileOutput from "./components/form/FileOutput.vue";
+import ImageOutput from "./components/form/ImageOutput.vue";
+import BaseLdapInput from "./components/form/BaseLdapInput.vue";
+Vue.component('FormBase', FormBase);
 
 // highlight filter
 Vue.filter('highlight', function (words: any, query: any) {
