@@ -7,8 +7,10 @@ import {fileURLToPath, URL} from "url";
 
 export default defineConfig({
   plugins: [
-    vue(/* options */),
+    vue(),
     Components({
+        transformer: 'vue2',
+        dts: true,
         resolvers: [
         VuetifyResolver()
       ]
@@ -20,7 +22,8 @@ export default defineConfig({
   build: {
     commonjsOptions: {
       transformMixedEsModules: true,
-    }
+    },
+    minify: 'esbuild'
   },
   resolve: {
     alias: {
