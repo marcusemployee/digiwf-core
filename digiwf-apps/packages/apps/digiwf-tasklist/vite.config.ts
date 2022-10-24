@@ -9,15 +9,18 @@ export default defineConfig({
   plugins: [
     vue(/* options */),
     Components({
-      transformer: 'vue2',
-      dts: true,
-      resolvers: [
+        resolvers: [
         VuetifyResolver()
       ]
     })
   ],
   server: {
     port: 8081
+  },
+  build: {
+    commonjsOptions: {
+      transformMixedEsModules: true,
+    }
   },
   resolve: {
     alias: {
