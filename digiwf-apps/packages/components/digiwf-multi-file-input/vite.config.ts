@@ -2,10 +2,19 @@ import vue from "@vitejs/plugin-vue2";
 import {defineConfig} from 'vite'
 //@ts-ignore
 import {fileURLToPath, URL} from "url";
+import Components from 'unplugin-vue-components/vite'
+import {VuetifyResolver} from "unplugin-vue-components/resolvers";
 
 export default defineConfig({
   plugins: [
-    vue()
+    vue(),
+    Components({
+      transformer: 'vue2',
+      dts: true,
+      resolvers: [
+        VuetifyResolver()
+      ]
+    })
   ],
   build: {
     lib: {
@@ -16,8 +25,7 @@ export default defineConfig({
       external: [
         'vue',
         'vuex',
-        'vue-router',
-        /@vuetify\/.*/
+        /vuetify\/.*/
       ],
       output: {
         globals: {
