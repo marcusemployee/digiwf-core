@@ -32,7 +32,7 @@
       <v-btn
         class="assignButton"
         color="primary"
-        @click="assignTask"
+        @click="checkTaskAssignment"
       >
         <v-icon left>
           mdi-pencil
@@ -40,6 +40,21 @@
         Bearbeiten
       </v-btn>
     </v-flex>
+
+    <app-yes-no-dialog v-if="task"
+      dialogtitle="Aufgabenzuweisung"
+      :value="showModal"
+      @yes="assignTask"
+      @no="showModal = false"
+    >
+      <div>
+        Die Aufgabe ist aktuell folgender Person zugewiesen:
+        <h3>{{task.assigneeFormatted}}</h3>
+        <br>
+        Wollen Sie die Aufgabe übernehmen?
+      </div>
+    </app-yes-no-dialog>
+
   </app-view-layout>
 </template>
 
@@ -83,6 +98,7 @@ import router from "../router";
 import {FetchUtils, HumanTaskDetailTO, HumanTaskRestControllerApiFactory} from '@muenchen/digiwf-engine-api-internal';
 import {FormContext} from "@muenchen/digiwf-multi-file-input";
 import {ApiConfig} from "../api/ApiConfig";
+import {UserTO} from "@muenchen/digiwf-engine-api-internal";
 
 @Component({
   components: {BaseForm, AppToast, TaskForm: BaseForm, AppViewLayout}
@@ -92,6 +108,7 @@ export default class MyTaskDetail extends Vue {
   task: HumanTaskDetailTO | null = null;
   isLoading = false;
   errorMessage = "";
+  showModal = false;
 
   @Prop()
   id!: string;
@@ -106,9 +123,27 @@ export default class MyTaskDetail extends Vue {
     this.loadTask();
   }
 
+  async checkTaskAssignment(): Promise<void> {
+    await this.loadTask();
+    if (this.task?.assignee) {
+      const currentUser: UserTO = this.$store.getters['user/info'];
+      if (this.task?.assignee != currentUser.lhmObjectId){
+        this.showModal = true;
+        setTimeout(() => this.showModal = false, 10000);
+      }
+      else {
+        router.push({path: '/task/' + this.id});
+      }
+    }
+    else {
+      this.assignTask();
+    }
+  }
+
   async assignTask(): Promise<void> {
+    this.showModal = false;
     try {
-      //await TaskService.assignTask(this.id);
+
       const cfg = ApiConfig.getAxiosConfig(FetchUtils.getPOSTConfig({}));
       await HumanTaskRestControllerApiFactory(cfg).assignTask(this.id);
 

@@ -31,8 +31,11 @@
       <v-card-title>
         {{ dialogtitle }}
       </v-card-title>
-      <v-card-text>
+      <v-card-text v-if="dialogtext">
         {{ dialogtext }}
+      </v-card-text>
+      <v-card-text v-else>
+        <slot></slot>
       </v-card-text>
       <v-card-actions>
         <v-spacer />
