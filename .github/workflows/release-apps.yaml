@@ -45,7 +45,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_KEY }}
 
       - name: Set Release version env variable
-        if: ${startsWith(github.ref, 'refs/tags/') || github.event.inputs.snapshot-run == 'n'}
+        if: startsWith(github.ref, 'refs/tags/') || github.event.inputs.snapshot-run == 'n'
         run: |
           echo "RELEASE_VERSION=$(grep -m1 version lerna.json | awk -F: '{ print $2 }' | sed 's/[", ]//g')" >> $GITHUB_ENV
 
