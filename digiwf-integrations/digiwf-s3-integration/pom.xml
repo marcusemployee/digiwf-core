@@ -42,5 +42,25 @@
             <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+            <version>${minio.version}</version>
+        </dependency>
+
+        <!-- Spring Cloud Stream -->
+        <dependency>
+            <groupId>io.muenchendigital.digiwf</groupId>
+            <artifactId>digiwf-spring-cloudstream-utils-starter</artifactId>
+            <version>${digiwf.spring.cloudstream.utils.version}</version>
+        </dependency>
+
+        <!--apache-->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>4.4</version>
+        </dependency>
+
     </dependencies>
 </project>
