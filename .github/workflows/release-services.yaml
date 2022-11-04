@@ -2,7 +2,7 @@ name: release services
 
 # Run workflow on commits to the `main` branch
 on:
-  workflow_dispatch
+  workflow_dispatch:
   push:
     tags:
       - 'core_*.*.*'
