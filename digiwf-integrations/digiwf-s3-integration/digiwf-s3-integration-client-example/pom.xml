@@ -3,8 +3,8 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>example-s3-integration-client</artifactId>
-    <name>example-s3-integration-client</name>
+    <artifactId>digiwf-s3-integration-client-example</artifactId>
+    <name>digiwf-s3-integration-client-example</name>
 
     <properties>
         <logstash.encoder>7.0.1</logstash.encoder>
