@@ -51,7 +51,7 @@ See the [open issues](#) for a full list of proposed features (and known issues)
 
 ## Set up
 
-*how can i start and fly this project*
+*how can I start and fly this project*
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -59,9 +59,19 @@ See the [open issues](#) for a full list of proposed features (and known issues)
 
 ### Building a new maven version
 
-- execute `Update version: ``mvn versions:set -DnewVersion='0.13.0-SNAPSHOT'``
-- create a new tag with `core_` prefix
-- `-SNAPSHOT` will be removed automatically by the pipeline
+For updating the version of the project we use maven-versions plugin.
+
+#### update new patch version
+
+1. run `mvn versions:set -DprocessAllModules -DnewVersion=<your version>`
+2. check if update is correct
+3. if update is correct, run `mvn versions:commit` otherwise run `mvn versions:revert`
+
+#### update to a specific version
+
+1. run `mvn versions:set -DprocessAllModules -DnextSnapshot`
+2. check if update is correct
+3. if update is correct, run `mvn versions:commit` otherwise run `mvn versions:revert`
 
 ### Building a new app library version
 
