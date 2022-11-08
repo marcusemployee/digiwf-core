@@ -138,6 +138,12 @@
             <id>deploy</id>
             <build>
                 <plugins>
+                    <!-- maven versions plugin-->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>versions-maven-plugin</artifactId>
+                        <version>2.13.0</version>
+                    </plugin>
                     <!-- Source plugin -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
