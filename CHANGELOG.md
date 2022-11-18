@@ -12,6 +12,7 @@
 - (email-integration): email integration modules added
 - (digiwf-verification-integration): verification integration modules added
 - (tasklist): save filter as url query param
+- (digiwf-camunda-prometheus): prometheus modules added
 
 ### Fixed
 
