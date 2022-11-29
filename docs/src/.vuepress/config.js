@@ -1,7 +1,7 @@
 const {description} = require('../../package.json')
 
 module.exports = {
-    base: "/digiwf-docs/",
+    base: "/",
     /**
      * Ref：https://v1.vuepress.vuejs.org/config/#title
      */
