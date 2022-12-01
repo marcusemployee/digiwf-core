@@ -8,6 +8,9 @@
 
 - tasklist
     - stop passing emtpy value in form
+    - continue button error
+    - multi user input validation
+    - maxItems serialization bug
 
 ## [services unrleased] - yyyy-mm-dd
 
