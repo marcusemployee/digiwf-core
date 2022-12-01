@@ -17,6 +17,9 @@
 
 ### Added
 
+- digiwf-cosys-integration
+  - error handling added
+
 ### Fixed
 
 - engine
