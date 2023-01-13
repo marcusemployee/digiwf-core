@@ -4,19 +4,21 @@
 
 package io.muenchendigital.digiwf.humantask.domain.service;
 
+import io.muenchendigital.digiwf.humantask.domain.mapper.ActRuTaskMapper;
 import io.muenchendigital.digiwf.humantask.domain.mapper.HumanTaskMapper;
+import io.muenchendigital.digiwf.humantask.domain.model.ActRuTask;
 import io.muenchendigital.digiwf.humantask.domain.model.HumanTask;
 import io.muenchendigital.digiwf.humantask.domain.model.HumanTaskDetail;
 import io.muenchendigital.digiwf.humantask.domain.model.TaskInfo;
+import io.muenchendigital.digiwf.humantask.infrastructure.repository.ActRuGroupTaskSearchRepository;
+import io.muenchendigital.digiwf.humantask.infrastructure.repository.ActRuTaskSearchRepository;
+import io.muenchendigital.digiwf.humantask.process.ProcessTaskConstants;
 import io.muenchendigital.digiwf.jsonschema.domain.model.JsonSchema;
 import io.muenchendigital.digiwf.jsonschema.domain.service.JsonSchemaService;
 import io.muenchendigital.digiwf.legacy.form.domain.model.Form;
 import io.muenchendigital.digiwf.legacy.form.domain.service.FormService;
-import io.muenchendigital.digiwf.legacy.user.domain.service.UserService;
-import io.muenchendigital.digiwf.service.definition.domain.service.ServiceDefinitionService;
 import io.muenchendigital.digiwf.shared.exception.IllegalResourceAccessException;
 import io.muenchendigital.digiwf.shared.exception.ObjectNotFoundException;
-import io.muenchendigital.digiwf.humantask.process.ProcessTaskConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -24,10 +26,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.camunda.bpm.engine.TaskService;
 import org.camunda.bpm.engine.task.IdentityLinkType;
 import org.camunda.bpm.engine.task.Task;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nullable;
 import java.sql.Date;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -42,11 +46,11 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class HumanTaskService {
-
-    private final ServiceDefinitionService processDefinitionService;
-    private final UserService userService;
     private final HumanTaskDataService humanTaskDataService;
     private final TaskInfoService taskInfoService;
+    private final ActRuTaskMapper actRuTaskMapper;
+    private final ActRuGroupTaskSearchRepository actRuGroupTaskSearchRepository;
+    private final ActRuTaskSearchRepository actRuTaskSearchRepository;
 
     //outdated form handling
     private final FormService formService;
@@ -69,7 +73,6 @@ public class HumanTaskService {
      */
     public HumanTaskDetail getDetail(final String taskId, final String userId, final List<String> groups) {
         final Task task = this.getTask(taskId);
-
         if (!this.hasAccess(task, userId, groups)) {
             throw new IllegalResourceAccessException(String.format("Task with id %s not accessable", taskId));
         }
@@ -110,15 +113,16 @@ public class HumanTaskService {
 
     /**
      * Returns the assigned tasks for the given userId
+     * In case of a missing task info there is an incomplete page content. The number of total items are the number of ActRuTask items.
      *
-     * @param userId Id of the user
-     * @return The tasks
+     * @param userId
+     * @param query
+     * @param followUp
+     * @param pageable
+     * @return
      */
-    public List<HumanTask> getTasksForUser(final String userId) {
-        val tasks = this.taskService.createTaskQuery()
-                .taskAssignee(userId)
-                .list();
-        return this.getHumanTasks(tasks);
+    public Page<HumanTask> getTasksForUser(final String userId, @Nullable final String query, final Boolean followUp, final Pageable pageable) {
+        return this.getActRuTaskEntityByAssigneeId(userId, query, followUp, pageable).map(this.humanTaskMapper::map2Model);
     }
 
     /**
@@ -128,40 +132,21 @@ public class HumanTaskService {
      * @param groups Assigned groups of the user
      * @return The open group tasks
      */
-    public List<HumanTask> getOpenGroupTasks(final String userId, final List<String> groups) {
-        log.debug("getOpenGroupTasks: user {}", userId);
-
-        val tasks = this.taskService.createTaskQuery()
-                .taskCandidateUser(userId)
-                .taskUnassigned()
-                .list();
-
-        val taskMap = tasks.stream().collect(Collectors.toMap(Task::getId, t -> t));
-        val groupTasks = this.queryTaskByCandidateGroup(groups, false);
-        groupTasks.stream().filter(task -> !taskMap.containsKey(task.getId())).forEach(tasks::add);
-        return this.getHumanTasks(tasks);
+    public Page<HumanTask> getOpenGroupTasks(final String userId, final List<String> groups, @Nullable final String query, final Pageable pageable) {
+        return this.getGroupTasks(userId, groups, false, query, pageable).map(this.humanTaskMapper::map2Model);
     }
 
     /**
      * Returns the group tasks for the given userId and groups that are assigned.
      *
-     * @param userId Id of the user
-     * @param groups Assigned groups of the user
-     * @return The assigned group tasks
+     * @param userId
+     * @param groups
+     * @param query
+     * @param pageable
+     * @return
      */
-    public List<HumanTask> getAssignedGroupTasks(final String userId, final List<String> groups) {
-        log.debug("getAssignedGroupTasks: user {}", userId);
-
-        val tasks = this.taskService.createTaskQuery()
-                .taskCandidateUser(userId)
-                .includeAssignedTasks()
-                .taskAssigned()
-                .list();
-
-        val taskMap = tasks.stream().collect(Collectors.toMap(Task::getId, t -> t));
-        val groupTasks = this.queryTaskByCandidateGroup(groups, true);
-        groupTasks.stream().filter(task -> !taskMap.containsKey(task.getId())).forEach(tasks::add);
-        return this.getHumanTasks(tasks);
+    public Page<HumanTask> getAssignedGroupTasks(final String userId, final List<String> groups, @Nullable final String query, final Pageable pageable) {
+        return this.getGroupTasks(userId, groups, true, query, pageable).map(this.humanTaskMapper::map2Model);
     }
 
     /**
@@ -297,52 +282,13 @@ public class HumanTaskService {
                         || userId.equals(link.getUserId()));
     }
 
-    //--------------------------------------------------------------- helper methods ---------------------------------------------------------------//
-
-    private List<HumanTask> getHumanTasks(final List<Task> tasks) {
-        log.debug("Found {} tasks", tasks.size());
-
-        if (tasks.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        final List<String> taskIds = tasks.stream()
-                .map(Task::getId)
-                .collect(Collectors.toList());
-
-        final Map<String, TaskInfo> taskInfos = this.taskInfoService.getTaskInfoMapByTaskIds(taskIds);
-
-        // If a camunda task does not exist in the dwf task info table log an error
-        // See: https://wiki.muenchen.de/betriebshandbuch/index.php/DigiWF#Backend -> Task is missing in TaskInfo database table
-        taskIds.stream()
-                .filter(taskId -> !taskInfos.containsKey(taskId))
-                .forEach(taskId -> log.error("Task with id {} is missing in TaskInfo database table", taskId));
-
-        return tasks.stream()
-                .filter(task -> taskInfos.containsKey(task.getId()))
-                .map(task -> this.humanTaskMapper.map2Model(task, taskInfos.get(task.getId())))
-                .collect(Collectors.toList());
+    private Page<ActRuTask> getActRuTaskEntityByAssigneeId(final String assigneeId, @Nullable final String query, final Boolean followUp, final Pageable pageable) {
+        return this.actRuTaskSearchRepository.search(assigneeId, query, followUp, pageable).map(actRuTaskMapper::map2Model);
     }
-
-    //TODO create a HumanTask Access Service for the following methods
-
-    private List<Task> queryTaskByCandidateGroup(final List<String> ous, final boolean assigned) {
-        // select assigned OR unassigned tasks
-        final String assigneeExpression = assigned ? "T1.ASSIGNEE_ IS NOT NULL" : "T1.ASSIGNEE_ IS NULL";
-
-        final String query = "SELECT * "
-                + "FROM ACT_RU_TASK T1"
-                + " WHERE " + assigneeExpression
-                + " AND T1.ID_ IN ("
-                + "SELECT TASK_ID_"
-                + " FROM ACT_RU_IDENTITYLINK I1"
-                + " WHERE I1.TYPE_ = 'candidate'"
-                + "AND (" + ous.stream().map(ou -> "lower(I1.GROUP_ID_) = lower('" + ou + "')").collect(Collectors.joining(" OR ")) + ")"
-                + ")";
-
-        return this.taskService.createNativeTaskQuery()
-                .sql(query)
-                .list();
+    private Page<ActRuTask> getGroupTasks(final String userId, final List<String> groups, final Boolean assigned, @Nullable final String query, final Pageable pageable) {
+        final List<String> lowerCaseGroups = groups.stream()
+                .map(String::toLowerCase)
+                .collect(Collectors.toList());
+        return this.actRuGroupTaskSearchRepository.search(userId, lowerCaseGroups, query, assigned, pageable).map(actRuTaskMapper::map2Model);
     }
-
 }

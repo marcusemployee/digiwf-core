@@ -1,15 +1,17 @@
 <template>
   <app-view-layout>
     <task-list
-      :tasks="tasks"
+      :tasks="data?.content || []"
+      :on-filter-change="onFilterChange"
+      :is-loading="isLoading"
+      :data-loading-error-message="errorMessage"
+      :filter.sync="filter"
+      @loadTasks="reloadTasks"
+
       view-name="Offene Gruppenaufgaben"
       description="Hier sehen Sie alle Aufgaben Ihrer Gruppe. Klicken Sie auf bearbeiten, um sich eine Aufgabe zu nehmen."
-      :is-loading="isLoading"
-      :error-message="errorMessage"
-      :filter.sync="filter"
       pageId="opengrouptasks"
-      @loadTasks="loadTasks(true)"
-      @update:filter="onFilterChanged"
+
     >
       <template #default="props">
         <group-task-item
@@ -21,6 +23,19 @@
         <hr class="hrDivider">
       </template>
     </task-list>
+    <AppPaginationFooter
+      found-data-text="Vorgänge gefunden"
+      :size="pagination.size?.value || 20"
+      :on-size-change="pagination.onSizeChange"
+      :last-page="pagination.lastPage"
+      :last-page-button-disabled="pagination.isLastPageButtonDisabled()"
+      :next-page="pagination.nextPage"
+      :total-number-of-items="data?.totalElements || 0"
+      :next-page-button-disabled="pagination.isNextPageButtonDisabled()"
+      :number-of-pages="data?.totalPages || 1"
+      :page="pagination.getCurrentPageLabel()"
+      :update-items-per-page="pagination.updateItemsPerPage"
+    />
   </app-view-layout>
 </template>
 
@@ -29,75 +44,76 @@
 </style>
 
 <script lang="ts">
-import {Component, Vue, Watch} from 'vue-property-decorator';
-import AppToast from "@/components/UI/AppToast.vue";
-import AppViewLayout from "@/components/UI/AppViewLayout.vue";
-import TaskList from "@/components/task/TaskList.vue";
-import GroupTaskItem from "@/components/task/GroupTaskItem.vue";
-import router from "../router";
-import {FetchUtils, HumanTaskRestControllerApiFactory, HumanTaskTO} from '@muenchen/digiwf-engine-api-internal';
-import {ApiConfig} from "../api/ApiConfig";
+import {defineComponent, watch} from "vue";
+import {useRouter} from "vue-router/composables";
+import {useAssignTaskMutation, useOpenGroupTasksQuery} from "../middleware/tasks/taskMiddleware";
+import {usePageId} from "../middleware/pageId";
+import {useGetPaginationData} from "../middleware/paginationData";
 
-@Component({
-  components: {GroupTaskItem, TaskList, AppToast, AppViewLayout}
-})
-export default class OpenGroupTasks extends Vue {
+export default defineComponent({
+  setup() {
+    const router = useRouter();
+    const pageId = usePageId();
+    const {searchQuery, size, page, setSize, setPage, setSearchQuery} = useGetPaginationData();
 
-  tasks: HumanTaskTO[] = [];
-  isLoading = false;
-  filter = "";
-  errorMessage = "";
+    const {isLoading, data, error, refetch} = useOpenGroupTasksQuery(page, size, searchQuery);
+    const assignMutation = useAssignTaskMutation();
 
-  created(): void {
-    this.loadTasks();
-    this.loadFilter();
-  }
+    const reloadTasks = (): void => {
+      refetch()
+    };
 
-  loadFilter(): void {
-    this.filter = this.$route.query.filter as string ?? "";
-    if (!this.filter) {
-      this.filter = this.$store.getters["tasks/openGroupTasksFilter"];
-      this.$router.replace({query: {filter: this.filter}});
+    watch(page, (newPage) => {
+      setPage(newPage);
+      reloadTasks();
+    })
+    watch(size, (newSize) => {
+      setSize(newSize)
+      reloadTasks();
+    })
+
+    const assignTask = async (id: string): Promise<void> => {
+      assignMutation.mutateAsync(id).then(() => router.push({path: '/task/' + id}))
+    }
+
+    return {
+      assignTask,
+      pageId,
+      isLoading,
+      errorMessage: error || assignMutation.error,
+      data,
+      filter: searchQuery,
+      reloadTasks,
+      pagination: {
+        page,
+        size,
+        onSizeChange: setSize,
+        getCurrentPageLabel: () => page.value + 1,
+        setPage,
+        lastPage: () => {
+          if (page.value === 0) {
+            return;
+          }
+          setPage(page.value - 1)
+          refetch()
+        },
+        nextPage: () => {
+          const totalPages = data.value?.totalPages;
+          if (!totalPages || page.value === totalPages - 1) {
+            return;
+          }
+          setPage(page.value + 1);
+          refetch();
+        },
+        isLastPageButtonDisabled: () => page.value === 0,
+        isNextPageButtonDisabled: () => page.value + 1 >= (data.value?.totalPages || 0),
+        updateItemsPerPage: setSize
+      },
+      onFilterChange: (newFilter: string | undefined) => {
+        setSearchQuery(newFilter || "");
+        reloadTasks();
+      },
     }
   }
-
-  async assignTask(id: string): Promise<void> {
-    try {
-      //await TaskService.assignTask(id);
-      const cfg = ApiConfig.getAxiosConfig(FetchUtils.getPOSTConfig({}));
-      await HumanTaskRestControllerApiFactory(cfg).assignTask(id);
-
-      this.$store.dispatch('tasks/getTasks', true);
-      this.$store.dispatch('openGroupTasks/getTasks', true);
-      this.errorMessage = "";
-      router.push({path: '/task/' + id});
-    } catch (error) {
-      this.errorMessage = 'Die Aufgabe konnte nicht zugewiesen werden.';
-    }
-  }
-
-  async loadTasks(refresh = false): Promise<void> {
-    this.tasks = this.$store.getters['openGroupTasks/tasks'];
-    this.isLoading = true;
-    const startTime = new Date().getTime();
-    try {
-      await this.$store.dispatch('openGroupTasks/getTasks', refresh);
-      this.errorMessage = "";
-    } catch (error) {
-      this.errorMessage = error.message;
-    }
-    setTimeout(() => this.isLoading = false, Math.max(0, 500 - (new Date().getTime() - startTime)));
-  }
-
-  onFilterChanged(filter: string) {
-    this.$router.replace({query: {filter: filter}});
-    this.$store.commit('tasks/setOpenGroupTasksFilter', filter);
-  }
-
-  @Watch('$store.state.openGroupTasks.tasks')
-  setTasks(): void {
-    this.tasks = this.$store.getters['openGroupTasks/tasks'];
-  }
-
-}
+});
 </script>

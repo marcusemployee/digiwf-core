@@ -7,7 +7,7 @@
       "name" : "DigiWF",
       "email" : "itm.digiwf@muenchen.de"
     },
-    "version" : "0.34.0-SNAPSHOT"
+    "version" : "0.1.0"
   },
   "externalDocs" : {
     "description" : "Externe Dokumentation auf unserer Wilma-Seite",
@@ -77,16 +77,50 @@
       "get" : {
         "tags" : [ "HumanTaskRestController" ],
         "operationId" : "getTasks",
+        "parameters" : [ {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "minimum" : 0,
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "maximum" : 50,
+            "minimum" : 1,
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 50
+          }
+        }, {
+          "name" : "query",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "followUp",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        } ],
         "responses" : {
           "200" : {
             "description" : "OK",
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/HumanTaskTO"
-                  }
+                  "$ref" : "#/components/schemas/PageHumanTaskTO"
                 }
               }
             }
@@ -108,14 +142,7 @@
         },
         "responses" : {
           "200" : {
-            "description" : "OK",
-            "content" : {
-              "*/*" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/HumanTaskDetailTO"
-                }
-              }
-            }
+            "description" : "OK"
           }
         }
       },
@@ -891,35 +918,6 @@
         }
       }
     },
-    "/rest/user/groups/{id}" : {
-      "get" : {
-        "tags" : [ "UserRestController" ],
-        "operationId" : "getUserGroups",
-        "parameters" : [ {
-          "name" : "id",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "*/*" : {
-                "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "type" : "string"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/rest/task/{id}" : {
       "get" : {
         "tags" : [ "HumanTaskRestController" ],
@@ -950,16 +948,42 @@
       "get" : {
         "tags" : [ "HumanTaskRestController" ],
         "operationId" : "getOpenGroupTasks",
+        "parameters" : [ {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "minimum" : 0,
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "maximum" : 50,
+            "minimum" : 1,
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 50
+          }
+        }, {
+          "name" : "query",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
         "responses" : {
           "200" : {
             "description" : "OK",
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/HumanTaskTO"
-                  }
+                  "$ref" : "#/components/schemas/PageHumanTaskTO"
                 }
               }
             }
@@ -971,16 +995,42 @@
       "get" : {
         "tags" : [ "HumanTaskRestController" ],
         "operationId" : "getAssignedGroupTasks",
+        "parameters" : [ {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "minimum" : 0,
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "maximum" : 50,
+            "minimum" : 1,
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 50
+          }
+        }, {
+          "name" : "query",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
         "responses" : {
           "200" : {
             "description" : "OK",
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/HumanTaskTO"
-                  }
+                  "$ref" : "#/components/schemas/PageHumanTaskTO"
                 }
               }
             }
@@ -1361,49 +1411,6 @@
         }
       }
     },
-    "/rest/filter/{id}" : {
-      "get" : {
-        "tags" : [ "FilterRestController" ],
-        "operationId" : "getFilter",
-        "parameters" : [ {
-          "name" : "id",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/FilterTO"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete" : {
-        "tags" : [ "FilterRestController" ],
-        "operationId" : "delete",
-        "parameters" : [ {
-          "name" : "id",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "OK"
-          }
-        }
-      }
-    },
     "/rest/document/task/{id}" : {
       "get" : {
         "tags" : [ "DocumentRestController" ],
@@ -1426,6 +1433,25 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/rest/filter/{id}" : {
+      "delete" : {
+        "tags" : [ "FilterRestController" ],
+        "operationId" : "delete",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
           }
         }
       }
@@ -1587,58 +1613,6 @@
             "items" : {
               "$ref" : "#/components/schemas/FormFieldTO"
             }
-          }
-        }
-      },
-      "HumanTaskDetailTO" : {
-        "required" : [ "creationTime", "id", "name", "processInstanceId", "processName" ],
-        "type" : "object",
-        "properties" : {
-          "id" : {
-            "type" : "string"
-          },
-          "name" : {
-            "type" : "string"
-          },
-          "description" : {
-            "type" : "string"
-          },
-          "processName" : {
-            "type" : "string"
-          },
-          "processInstanceId" : {
-            "type" : "string"
-          },
-          "assignee" : {
-            "type" : "string"
-          },
-          "assigneeFormatted" : {
-            "type" : "string"
-          },
-          "followUpDate" : {
-            "type" : "string"
-          },
-          "creationTime" : {
-            "type" : "string",
-            "format" : "date-time"
-          },
-          "variables" : {
-            "type" : "object",
-            "additionalProperties" : {
-              "type" : "object"
-            }
-          },
-          "form" : {
-            "$ref" : "#/components/schemas/FormTO"
-          },
-          "jsonSchema" : {
-            "type" : "object",
-            "additionalProperties" : {
-              "type" : "object"
-            }
-          },
-          "statusDocument" : {
-            "type" : "boolean"
           }
         }
       },
@@ -1961,6 +1935,144 @@
           "creationTime" : {
             "type" : "string",
             "format" : "date-time"
+          }
+        }
+      },
+      "PageHumanTaskTO" : {
+        "type" : "object",
+        "properties" : {
+          "totalPages" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalElements" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "numberOfElements" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "first" : {
+            "type" : "boolean"
+          },
+          "last" : {
+            "type" : "boolean"
+          },
+          "pageable" : {
+            "$ref" : "#/components/schemas/PageableObject"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "content" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/HumanTaskTO"
+            }
+          },
+          "number" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "sort" : {
+            "$ref" : "#/components/schemas/Sort"
+          },
+          "empty" : {
+            "type" : "boolean"
+          }
+        }
+      },
+      "PageableObject" : {
+        "type" : "object",
+        "properties" : {
+          "pageNumber" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "pageSize" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "paged" : {
+            "type" : "boolean"
+          },
+          "unpaged" : {
+            "type" : "boolean"
+          },
+          "offset" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "sort" : {
+            "$ref" : "#/components/schemas/Sort"
+          }
+        }
+      },
+      "Sort" : {
+        "type" : "object",
+        "properties" : {
+          "sorted" : {
+            "type" : "boolean"
+          },
+          "unsorted" : {
+            "type" : "boolean"
+          },
+          "empty" : {
+            "type" : "boolean"
+          }
+        }
+      },
+      "HumanTaskDetailTO" : {
+        "required" : [ "creationTime", "id", "name", "processInstanceId", "processName" ],
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "processName" : {
+            "type" : "string"
+          },
+          "processInstanceId" : {
+            "type" : "string"
+          },
+          "assignee" : {
+            "type" : "string"
+          },
+          "assigneeFormatted" : {
+            "type" : "string"
+          },
+          "followUpDate" : {
+            "type" : "string"
+          },
+          "creationTime" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "variables" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "object"
+            }
+          },
+          "form" : {
+            "$ref" : "#/components/schemas/FormTO"
+          },
+          "jsonSchema" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "object"
+            }
+          },
+          "statusDocument" : {
+            "type" : "boolean"
           }
         }
       },

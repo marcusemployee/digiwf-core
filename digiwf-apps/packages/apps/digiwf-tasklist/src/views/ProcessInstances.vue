@@ -100,6 +100,7 @@
       </v-flex>
       <app-pageable-list
         :items="filteredProcessInstances"
+        :totalNumberOfItems="numberOfProcessInstances"
         found-data-text="Vorgänge gefunden"
         no-data-text="Keine laufenden Vorgänge gefunden"
       >
@@ -132,25 +133,23 @@
 }
 
 .searchField {
-  margin: 1rem 0px 1rem 0;
+  margin: 1rem 0 1rem 0;
 }
 </style>
 
 <script lang="ts">
-import {Component, Vue, Watch} from 'vue-property-decorator';
+import {Component, Vue} from 'vue-property-decorator';
 import AppToast from "@/components/UI/AppToast.vue";
 import TaskItem from "@/components/task/TaskItem.vue";
 import AppViewLayout from "@/components/UI/AppViewLayout.vue";
-import {
-  FetchUtils,
-  FilterRestControllerApiFactory,
-  FilterTO,
-  SaveFilterTO,
-  ServiceInstanceTO
-} from '@muenchen/digiwf-engine-api-internal';
+import {FilterTO, SaveFilterTO, ServiceInstanceTO} from '@muenchen/digiwf-engine-api-internal';
 import AppPageableList from "@/components/UI/AppPageableList.vue";
 import ProcessInstanceItem from "@/components/process/ProcessInstanceItem.vue";
-import {ApiConfig} from "../api/ApiConfig";
+import {
+  deletePersistentFilterForNonHookCompatibleFunction,
+  getPersistentFilterForNonHookCompatibleFunction,
+  savePersistentFilterForNonHookCompatibleFunction
+} from "../middleware/persistentFilter/persistentFilters";
 
 @Component({
   components: {ProcessInstanceItem, AppPageableList, TaskItem, AppToast, AppViewLayout}
@@ -158,6 +157,7 @@ import {ApiConfig} from "../api/ApiConfig";
 export default class ProcessInstances extends Vue {
 
   processInstances: ServiceInstanceTO[] = [];
+  numberOfProcessInstances: number = 0;
   isLoading = false;
   filter = "";
   errorMessage = "";
@@ -171,6 +171,7 @@ export default class ProcessInstances extends Vue {
 
   async loadMyProcessInstances(refresh = false): Promise<void> {
     this.processInstances = this.$store.getters['processInstances/processInstances'];
+    this.numberOfProcessInstances = this.processInstances.length
     this.isLoading = true;
     const startTime = new Date().getTime();
     try {
@@ -230,11 +231,8 @@ export default class ProcessInstances extends Vue {
       filterString: this.filter,
     }
     try {
-      const cfg = ApiConfig.getAxiosConfig(FetchUtils.getPUTConfig({}));
-      await FilterRestControllerApiFactory(cfg).saveFilter(request);
-
+      await savePersistentFilterForNonHookCompatibleFunction(request)
       this.errorMessage = "";
-      this.$store.dispatch('filters/getFilters', true);
     } catch (error) {
       this.errorMessage = 'Der Filter konnte nicht gespeichert werden.';
     }
@@ -243,30 +241,21 @@ export default class ProcessInstances extends Vue {
   async deletePersistentFilter() {
     const id = this.persistentFilters!.find((f: FilterTO) => f.filterString == this.filter)?.id!
     try {
-      const cfg = ApiConfig.getAxiosConfig(FetchUtils.getDELETEConfig());
-      await FilterRestControllerApiFactory(cfg)._delete(id);
-
+      await deletePersistentFilterForNonHookCompatibleFunction(id);
       this.errorMessage = "";
-      this.$store.dispatch('filters/getFilters', true);
     } catch (error) {
       this.errorMessage = 'Der Filter konnte nicht gelöscht werden.';
     }
   }
 
   async loadPersistentFilters(refresh = false): Promise<void> {
-    this.persistentFilters = this.$store.getters['filters/filters'].filter((filter: FilterTO) => filter.pageId === "processinstances");
     try {
-      await this.$store.dispatch('filters/getFilters', refresh);
+      const serverSideFilters = await getPersistentFilterForNonHookCompatibleFunction();
+      this.persistentFilters = serverSideFilters.filter((filter: FilterTO) => filter.pageId === "processinstances");
       this.errorMessage = "";
     } catch (error) {
       this.errorMessage = error.message;
     }
   }
-
-  @Watch('$store.state.filters.filters')
-  setPersistentFilters(): void {
-    this.persistentFilters = this.$store.getters['filters/filters'].filter((filter: FilterTO) => filter.pageId === 'processinstances');
-  }
-
 }
 </script>

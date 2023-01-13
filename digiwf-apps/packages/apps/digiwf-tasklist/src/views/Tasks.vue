@@ -1,14 +1,14 @@
 <template>
   <app-view-layout>
     <task-list
-      :tasks="tasks"
+      :tasks="data?.content || []"
+      :on-filter-change="onFilterChange"
       view-name="Meine Aufgaben"
       :is-loading="isLoading"
-      :error-message="errorMessage"
+      :data-loading-error-message="errorMessage"
       :filter.sync="filter"
       pageId="tasks"
-      @loadTasks="loadTasks(true)"
-      @update:filter="onFilterChanged"
+      @loadTasks="reloadTasks"
     >
       <template #default="props">
         <task-item
@@ -28,6 +28,19 @@
         class="followUp"
       />
     </div>
+    <AppPaginationFooter
+      found-data-text="Vorgänge gefunden"
+      :size="pagination.size?.value || 20"
+      :on-size-change="pagination.onSizeChange"
+      :last-page="pagination.lastPage"
+      :last-page-button-disabled="pagination.isLastPageButtonDisabled()"
+      :next-page="pagination.nextPage"
+      :total-number-of-items="data?.totalElements || 0"
+      :next-page-button-disabled="pagination.isNextPageButtonDisabled()"
+      :number-of-pages="data?.totalPages || 1"
+      :page="pagination.getCurrentPageLabel()"
+      :update-items-per-page="pagination.updateItemsPerPage"
+    />
   </app-view-layout>
 </template>
 
@@ -35,83 +48,90 @@
 .followUp {
   margin: 0;
 }
-
 </style>
 
 <script lang="ts">
-import {Component, Vue, Watch} from 'vue-property-decorator';
-import {HumanTaskTO} from '@muenchen/digiwf-engine-api-internal';
 import AppToast from "@/components/UI/AppToast.vue";
 import AppViewLayout from "@/components/UI/AppViewLayout.vue";
 import TaskList from "@/components/task/TaskList.vue";
 import TaskItem from "@/components/task/TaskItem.vue";
+import {defineComponent, ref, watch} from "vue";
+import {useRouter} from "vue-router/composables";
+import AppPaginationFooter from "../components/UI/AppPaginationFooter.vue";
+import {useMyTasksQuery} from "../middleware/tasks/taskMiddleware";
+import {useGetPaginationData} from "../middleware/paginationData";
+import {usePageId} from "../middleware/pageId";
 
-@Component({
-  components: {TaskItem, TaskList, AppToast, AppViewLayout}
-})
-export default class Tasks extends Vue {
+export default defineComponent({
+  props: [],
+  components: {AppPaginationFooter, TaskItem, TaskList, AppToast, AppViewLayout},
+  setup() {
+    const router = useRouter();
+    const pageId = usePageId();
+    const {searchQuery, size, page, setSize, setPage, setSearchQuery} = useGetPaginationData();
 
-  tasks: HumanTaskTO[] = [];
-  isLoading = false;
-  filter = "";
-  errorMessage = "";
-  followUp = false;
+    const getFollowOfUrl = (): boolean => router.currentRoute.query?.followUp === "true"
+    const followUp = ref<boolean>(getFollowOfUrl());
+    const {isLoading, data, error, refetch} = useMyTasksQuery(page, size, searchQuery, followUp);
 
-  mounted(): void {
-    this.loadTasks(false);
-    this.followUp = this.$store.getters['tasks/followUp'];
-  }
+    watch(page, (newPage) => {
+      setPage(newPage);
+      refetch();
+    })
+    watch(size, (newSize) => {
+      setSize(newSize)
+      refetch();
+    })
 
-  created(): void {
-    this.loadFilter();
-  }
+    watch(followUp, (followUp) => {
+      router.replace({
+        query: {
+          ...router.currentRoute.query,
+          followUp: followUp ? "true" : "false"
+        }
+      })
+      refetch();
+    });
 
-  loadFilter(): void {
-    this.filter = this.$route.query.filter as string ?? "";
-    if (!this.filter) {
-      this.filter = this.$store.getters["tasks/tasksFilter"];
-      this.$router.replace({query: {filter: this.filter}});
+    return {
+      pageId,
+      followUp,
+      isLoading,
+      errorMessage: error,
+      data,
+      filter: searchQuery,
+      reloadTasks: refetch,
+      pagination: {
+        page,
+        size,
+        onSizeChange: setSize,
+        getCurrentPageLabel: () => page.value + 1,
+        setPage,
+        lastPage: () => {
+          if (page.value === 0) {
+            return;
+          }
+          setPage(page.value - 1)
+          refetch()
+        },
+        nextPage: () => {
+          const totalPages = data.value?.totalPages;
+          if (!totalPages || page.value === totalPages - 1) {
+            return;
+          }
+          setPage(page.value + 1);
+          refetch();
+        },
+        isLastPageButtonDisabled: () => page.value === 0,
+        isNextPageButtonDisabled: () => page.value + 1 >= (data.value?.totalPages || 0),
+        updateItemsPerPage: setSize
+      },
+      onFilterChange: (newFilter: string | undefined) => {
+        setSearchQuery(newFilter || "");
+        refetch();
+      },
     }
   }
+});
 
-  async loadTasks(refresh = false): Promise<void> {
-    this.reloadTasks();
-    this.isLoading = true;
-    const startTime = new Date().getTime();
-    try {
-      await this.$store.dispatch('tasks/getTasks', refresh);
-      this.errorMessage = "";
-    } catch (error) {
-      this.errorMessage = error.message;
-    }
-    setTimeout(() => this.isLoading = false, Math.max(0, 500 - (new Date().getTime() - startTime)));
-  }
-
-  @Watch('$store.state.tasks.tasks')
-  setTasks(): void {
-    this.reloadTasks();
-  }
-
-  @Watch("followUp")
-  setFollowUp(): void {
-    this.$store.dispatch('tasks/setFollowUp', this.followUp);
-    this.reloadTasks();
-  }
-
-  reloadTasks(): void {
-    let tasks = this.$store.getters['tasks/tasks'];
-    const followUp = this.$store.getters['tasks/followUp'];
-
-    if (!followUp) {
-      tasks = tasks.filter((task: HumanTaskTO) => task.followUpDate == '' || new Date().getTime() > new Date(task.followUpDate!).getTime());
-    }
-    this.tasks = tasks;
-  }
-
-  onFilterChanged(filter: string) {
-    this.$router.replace({query: {filter: filter}})
-    this.$store.commit('tasks/setTasksFilter', filter);
-  }
-
-}
 </script>

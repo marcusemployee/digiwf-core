@@ -41,64 +41,8 @@
       clipped
       width="300"
     >
-      <v-list>
-        <v-list-item :to="{ path: '/mytask' }">
-          <v-list-item-content class="itemContent">
-            <v-list-item-title class="navigationTitle">
-              <span>Meine Aufgaben</span>
-              <span class="counter grey--text text--darken-2">{{ myTaskCount }}</span>
-            </v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-        <hr class="hrDividerMenu">
-        <v-list-item :to="{ path: '/instance' }">
-          <v-list-item-content class="itemContent">
-            <v-list-item-title class="navigationTitle">
-              <span>Aktuelle Vorgänge</span>
-              <span
-                class="counter grey--text text--darken-2"
-              >{{ processInstancesCount }}</span>
-            </v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-        <hr class="hrDividerMenu">
-        <v-list-item :to="{ path: '/process' }">
-          <v-list-item-content class="itemContent">
-            <v-list-item-title>Vorgang Starten</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-        <hr
-          class="hrDividerMenu"
-          style="margin-bottom: 60px"
-        >
-        <p class="grey--text ml-9 mt-5 mb-0">
-          Gruppenaufgaben
-        </p>
-        <v-list-item :to="{ path: '/opengrouptask' }">
-          <v-list-item-content class="itemContent">
-            <v-list-item-title class="navigationTitle">
-              <span>Offen</span>
-              <span
-                class="counter grey--text  text--darken-2"
-              >{{ openGroupTaskCount }}</span>
-            </v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-        <hr class="hrDividerMenu">
-        <v-list-item :to="{ path: '/assignedgrouptask' }">
-          <v-list-item-content class="itemContent">
-            <v-list-item-title class="navigationTitle">
-              <span>in Bearbeitung</span>
-              <span
-                class="counter grey--text text--darken-2"
-              >{{ assignedGroupTaskCount }}</span>
-            </v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-        <hr class="hrDividerMenu">
-      </v-list>
+<AppMenuList :number-of-process-instances="processInstancesCount"/>
     </v-navigation-drawer>
-
     <v-main class="main">
       <v-banner
         v-if="appInfo && appInfo.maintenanceInfo1"
@@ -127,24 +71,6 @@
 </template>
 
 <style scoped>
-
-
-.itemContent {
-  margin: 5px 20px;
-}
-
-.counter {
-  font-size: 0.9rem;
-  font-weight: bold;
-}
-
-.navigationTitle {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  flex-direction: row;
-}
-
 .maintenance >>> .v-banner__wrapper {
   padding: 0;
 }
@@ -219,15 +145,14 @@ a {
 <script lang="ts">
 import Vue from "vue";
 import {Component, Watch} from "vue-property-decorator";
-import {HumanTaskTO, InfoTO, ServiceInstanceTO, UserTO,} from "@muenchen/digiwf-engine-api-internal";
+import {InfoTO, ServiceInstanceTO, UserTO,} from "@muenchen/digiwf-engine-api-internal";
+import AppMenuList from "./components/UI/appMenu/AppMenuList.vue";
 
-@Component()
+@Component({
+  components: {AppMenuList}
+})
 export default class App extends Vue {
   drawer = true;
-  query = "";
-  myTaskCount: number | null = null;
-  openGroupTaskCount: number | null = null;
-  assignedGroupTaskCount: number | null = null;
   processInstancesCount: number | null = null;
   username = "";
   appInfo: InfoTO | null = null;
@@ -236,14 +161,7 @@ export default class App extends Vue {
     this.loadData();
   }
 
-  mounted(): void {
-    this.query = this.$route.params.query;
-  }
-
   loadData(refresh = false): void {
-    this.$store.dispatch("tasks/getTasks", refresh);
-    this.$store.dispatch("openGroupTasks/getTasks", refresh);
-    this.$store.dispatch("assignedGroupTasks/getTasks", refresh);
     this.$store.dispatch("processInstances/getProcessInstances", refresh);
     this.$store.dispatch("user/getUserInfo", refresh);
     this.$store.dispatch("info/getInfo", refresh);
@@ -255,35 +173,9 @@ export default class App extends Vue {
     this.drawer = menuOpen;
   }
 
-  @Watch("$route.params.query")
-  function(query: string): void {
-    if (this.query !== query) this.query = query;
-  }
-
-
-  @Watch("$store.state.tasks.tasks")
-  setMyTaskCount(tasks: HumanTaskTO[]): void {
-    const filteredTasks = tasks.filter(
-      (task: HumanTaskTO) =>
-        task.followUpDate == '' ||
-        new Date().getTime() > new Date(task.followUpDate!).getTime()
-    );
-    this.myTaskCount = filteredTasks.length;
-  }
-
   @Watch("$store.state.user.info")
   setUserName(user: UserTO): void {
     this.username = user.forename + " " + user.surname;
-  }
-
-  @Watch("$store.state.openGroupTasks.tasks")
-  setOpenGroupTaskCount(tasks: HumanTaskTO[]): void {
-    this.openGroupTaskCount = tasks.length;
-  }
-
-  @Watch("$store.state.assignedGroupTasks.tasks")
-  setAssignedGroupTaskCount(tasks: HumanTaskTO[]): void {
-    this.assignedGroupTaskCount = tasks.length;
   }
 
   @Watch("$store.state.processInstances.processInstances")

@@ -1,10 +1,12 @@
 package io.muenchendigital.digiwf.humantask.domain.mapper;
 
+import io.muenchendigital.digiwf.humantask.domain.model.ActRuTask;
 import io.muenchendigital.digiwf.humantask.domain.model.HumanTask;
 import io.muenchendigital.digiwf.humantask.domain.model.HumanTaskDetail;
 import io.muenchendigital.digiwf.humantask.domain.model.TaskInfo;
+import lombok.val;
 import org.camunda.bpm.engine.task.Task;
-import org.mapstruct.Mapper;
+import org.springframework.stereotype.Component;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -12,26 +14,25 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 
-@Mapper
-public interface HumanTaskMapper {
+@Component
+public class HumanTaskMapper {
 
-    default HumanTask map2Model(
-            final Task task,
-            final TaskInfo taskInfoEntity) {
-
+    public HumanTask map2Model(
+            final ActRuTask actRuTask) {
+        val taskInfo = Optional.ofNullable(actRuTask.getTaskInfo());
         return HumanTask.builder()
-                .id(task.getId())
-                .assignee(task.getAssignee())
-                .assigneeFormatted(taskInfoEntity.getAssignee())
-                .creationTime(task.getCreateTime())
-                .name(task.getName())
-                .description(taskInfoEntity.getDescription())
-                .followUpDate(this.mapDate(task.getFollowUpDate()))
-                .processName(taskInfoEntity.getDefinitionName() != null ? taskInfoEntity.getDefinitionName() : "")
+                .id(actRuTask.getId())
+                .assignee(actRuTask.getAssignee())
+                .assigneeFormatted(taskInfo.isEmpty() ? null : taskInfo.get().getAssignee())
+                .creationTime(actRuTask.getCreatedAt())
+                .name(actRuTask.getName())
+                .description(taskInfo.isEmpty() ? null : taskInfo.get().getDescription())
+                .followUpDate(this.mapDate(actRuTask.getFollowUpDate()))
+                .processName((taskInfo.isEmpty() || taskInfo.get().getDefinitionName() == null) ? "" : taskInfo.get().getDefinitionName())
                 .build();
     }
 
-    default HumanTaskDetail map2Model(
+    public HumanTaskDetail map2Model(
             final Task task,
             final TaskInfo taskInfoEntity,
             final Map<String, Object> variables
@@ -50,7 +51,7 @@ public interface HumanTaskMapper {
                 .build();
     }
 
-    default String mapDate(final Date date) {
+    public String mapDate(final Date date) {
         final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         return Optional.ofNullable(date)
                 .map(dateFormat::format)
