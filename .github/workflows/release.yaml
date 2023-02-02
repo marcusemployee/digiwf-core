@@ -110,6 +110,13 @@ jobs:
           push: true
           tags: itatm/digiwf-verification-integration-service:${{ env.RELEASE_VERSION }},itatm/digiwf-verification-integration:dev
 
+      - name: Build and push oss engine
+        uses: docker/build-push-action@v4
+        with:
+          context: ./digiwf-engine/digiwf-engine-service
+          push: true
+          tags: itatm/digiwf-engine-service-community:${{ env.RELEASE_VERSION }},itatm/digiwf-engine-service-community:dev
+
   release-services-camunda-ee:
     if: github.event.inputs.services == 'y'
     runs-on: ubuntu-latest
