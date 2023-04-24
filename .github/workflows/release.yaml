@@ -20,6 +20,10 @@ on:
         description: 'Release services (y/n)?'
         required: true
         default: 'y'
+      maven:
+        description: 'Release Maven (y/n)?'
+        required: true
+        default: 'y'
       docs:
         description: 'Release docs (y/n)?'
         required: true
@@ -44,7 +48,12 @@ jobs:
         run: |
           mvn versions:set --batch-mode -DremoveSnapshot -DprocessAllModules
 
+      - name: Build with Maven
+        if: github.event.inputs.maven == 'n'
+        run: mvn --batch-mode install -DskipTests
+
       - name: Release Maven package
+        if: github.event.inputs.maven == 'y'
         uses: samuelmeuli/action-maven-publish@v1
         with:
           gpg_private_key: ${{ secrets.gpg_private_key }}
