@@ -149,7 +149,6 @@
 </style>
 
 <script lang="ts">
-
 import {Component, Prop, Provide} from "vue-property-decorator";
 import AppViewLayout from "@/components/UI/AppViewLayout.vue";
 import BaseForm from "@/components/form/BaseForm.vue";
@@ -169,7 +168,6 @@ import {
   deferTask
 } from "../middleware/tasks/taskMiddleware";
 import {HumanTaskDetails} from "../middleware/tasks/tasksModels";
-
 
 @Component({
   components: {TaskFollowUpDialog, BaseForm, AppToast, TaskForm: BaseForm, AppViewLayout, AppYesNoDialog, LoadingFab}
