@@ -2,7 +2,8 @@ import {useMutation, useQuery, useQueryClient} from "@tanstack/vue-query";
 import {
   callAssignTaskInEngine,
   callAssignTaskInTaskService,
-  callCancelTaskInEngine,
+  callCancelTaskInEngine, 
+  callCancelTaskInTaskService,
   callCompleteTaskInEngine,
   callCompleteTaskInTaskService,
   callDeferTask,
@@ -167,7 +168,6 @@ export const useAssignTaskMutation = () => {
   })
 }
 
-
 export interface LoadTaskFromEngineResultData {
   readonly task: HumanTaskDetails;
   readonly model?: { [key: string]: object; }
@@ -290,16 +290,20 @@ export interface CancelTaskResult {
  * @deprecated
  * @param taskId
  */
-export const cancelTaskInEngine = (taskId: string): Promise<CancelTaskResult> => {
-  return callCancelTaskInEngine(taskId).then(() => {
+export const cancelTask = (taskId: string): Promise<CancelTaskResult> => {
+  return (
+    shouldUseTaskService()
+      ? callCancelTaskInTaskService(taskId)
+      : callCancelTaskInEngine(taskId)
+  ).then(() => {
     queryClient.invalidateQueries([userTasksQueryId])
-    router.push({path: "/task"}); // FIXME: copied from old source code. Question is why /task is called (path does not exist)
+    router.push({path: "/task"});
 
     return Promise.resolve<CancelTaskResult>({
       isError: false
     });
 
-  }).catch(_ => {
+  }).catch((_: any) => {
     return Promise.resolve<CancelTaskResult>({
       isError: true,
       errorMessage: "Die Aufgabe konnte nicht abgebrochen werden."

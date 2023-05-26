@@ -84,7 +84,7 @@
           :has-error="hasCancelError"
           color="white"
           :button-text="cancelText"
-          @on-click="cancelTask"
+          @on-click="handleCancelTask"
         >
           <v-icon> mdi-cancel</v-icon>
         </loading-fab>
@@ -160,7 +160,7 @@ import LoadingFab from "@/components/UI/LoadingFab.vue";
 import {FormContext} from "@muenchen/digiwf-multi-file-input";
 import {ApiConfig} from "../api/ApiConfig";
 import {
-  cancelTaskInEngine,
+  cancelTask,
   completeTask,
   downloadPDFFromEngine,
   loadTask,
@@ -168,6 +168,7 @@ import {
   deferTask
 } from "../middleware/tasks/taskMiddleware";
 import {HumanTaskDetails} from "../middleware/tasks/tasksModels";
+
 
 @Component({
   components: {TaskFollowUpDialog, BaseForm, AppToast, TaskForm: BaseForm, AppViewLayout, AppYesNoDialog, LoadingFab}
@@ -292,9 +293,9 @@ export default class TaskDetail extends SaveLeaveMixin {
       });
   }
 
-  cancelTask() {
+  handleCancelTask() {
     this.isCancelling = true;
-    cancelTaskInEngine(this.id).then(result => {
+    cancelTask(this.id).then(result => {
       this.isCancelling = false;
       this.hasCancelError = result.isError;
       this.errorMessage = result.errorMessage || ""
