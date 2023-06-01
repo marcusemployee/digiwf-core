@@ -204,6 +204,12 @@ export interface Task {
      * @memberof Task
      */
     'schemaRef': string;
+    /**
+     *
+     * @type {TaskSchemaType}
+     * @memberof Task
+     */
+    'schemaType': TaskSchemaType;
 }
 /**
  * Task assignment information.
@@ -250,6 +256,20 @@ export interface TaskDeferral {
      */
     'followUpDate': string;
 }
+/**
+ * Task schema type.
+ * @export
+ * @enum {string}
+ */
+
+export const TaskSchemaType = {
+    SchemaBased: 'SCHEMA_BASED',
+    VuetifyFormBase: 'VUETIFY_FORM_BASE'
+} as const;
+
+export type TaskSchemaType = typeof TaskSchemaType[keyof typeof TaskSchemaType];
+
+
 /**
  * Represents a user task.
  * @export
@@ -322,6 +342,12 @@ export interface TaskWithDetails {
      * @memberof TaskWithDetails
      */
     'cancelable': boolean;
+    /**
+     *
+     * @type {TaskSchemaType}
+     * @memberof TaskWithDetails
+     */
+    'schemaType': TaskSchemaType;
 }
 /**
  * Represents a user task with embedded combined schema.
@@ -395,6 +421,12 @@ export interface TaskWithSchema {
      * @memberof TaskWithSchema
      */
     'cancelable': boolean;
+    /**
+     *
+     * @type {TaskSchemaType}
+     * @memberof TaskWithSchema
+     */
+    'schemaType': TaskSchemaType;
 }
 /**
  * Profile of the user.
