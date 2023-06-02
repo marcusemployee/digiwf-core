@@ -2,7 +2,7 @@ import {useMutation, useQuery, useQueryClient} from "@tanstack/vue-query";
 import {
   callAssignTaskInEngine,
   callAssignTaskInTaskService,
-  callCancelTaskInEngine, 
+  callCancelTaskInEngine,
   callCancelTaskInTaskService,
   callCompleteTaskInEngine,
   callCompleteTaskInTaskService,
