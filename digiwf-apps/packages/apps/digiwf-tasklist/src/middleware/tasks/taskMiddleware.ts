@@ -393,8 +393,8 @@ export const assignTask = (taskId: string,): Promise<AssignTaskResult> => {
   const userId = store.getters["user/info"].lhmObjectId;
   return (
     shouldUseTaskService()
-      ? callAssignTaskInEngine(taskId)
-      : callAssignTaskInTaskService(taskId, userId)
+      ? callAssignTaskInTaskService(taskId, userId)
+      : callAssignTaskInEngine(taskId)
   ).then(() => {
     router.push({path: "/task/" + taskId});
     invalideUserTasks()
