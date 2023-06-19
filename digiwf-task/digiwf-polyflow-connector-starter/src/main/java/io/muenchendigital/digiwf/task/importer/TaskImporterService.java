@@ -12,13 +12,15 @@ import org.camunda.bpm.engine.TaskService;
 import org.camunda.bpm.engine.impl.persistence.entity.TaskEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.RolesAllowed;
-import static io.holunda.camunda.bpm.data.CamundaBpmData.reader;
 
-import static io.muenchendigital.digiwf.task.TaskVariables.TASK_SCHEMA_TYPE;
+import java.util.HashSet;
+import java.util.stream.Collectors;
+
 import static org.springframework.http.ResponseEntity.noContent;
 
 @RequiredArgsConstructor
@@ -44,16 +46,31 @@ public class TaskImporterService {
     @RolesAllowed(CLIENT_IMPORT_TASKS)
     public ResponseEntity<Void> enrichExistingTasks() {
 
-        val tasks = taskService.createTaskQuery().active().withCandidateUsers().withCandidateGroups().list();
+        log.info("Selecting candidates for task enrichment from " + taskService.createTaskQuery().active().count() + " tasks.");
+        val tasks = new HashSet<TaskEntity>();
+        tasks.addAll(taskService.createTaskQuery()
+            .active()
+            .withCandidateUsers()
+            .list().stream().map(task -> ((TaskEntity)task)).collect(Collectors.toList()));
+        tasks.addAll(taskService.createTaskQuery()
+          .active()
+          .withCandidateGroups()
+          .list().stream().map(task -> ((TaskEntity)task)).collect(Collectors.toList()));
+        tasks.addAll(taskService.createTaskQuery()
+          .active()
+          .taskAssigned()
+          .list().stream().map(task -> ((TaskEntity)task)).collect(Collectors.toList()));
+
+        log.info("Selected for enrichment " + tasks.size() + " tasks");
 
         tasks.forEach((task) -> {
-            val taskEntity = ((TaskEntity)task);
-            assignmentCreateTaskListener.taskCreated(taskEntity);
-            cancelableTaskStatusCreateTaskListener.taskCreated(taskEntity);
-            taskSchemaTypeCreateTaskListener.taskCreated(taskEntity);
-            taskDescriptionCreateTaskListener.taskCreated(taskEntity);
+            assignmentCreateTaskListener.taskCreated(task);
+            cancelableTaskStatusCreateTaskListener.taskCreated(task);
+            taskSchemaTypeCreateTaskListener.taskCreated(task);
+            taskDescriptionCreateTaskListener.taskCreated(task);
         });
 
+        log.info("Enrichment of " + tasks.size() + " tasks finished");
         return noContent().build();
     }
 

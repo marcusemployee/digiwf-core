@@ -8,6 +8,7 @@ import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.TaskService;
 import org.camunda.bpm.engine.delegate.DelegateTask;
 import org.camunda.bpm.engine.delegate.TaskListener;
+import org.camunda.bpm.engine.impl.telemetry.TelemetryRegistry;
 import org.camunda.bpm.engine.test.Deployment;
 import org.camunda.bpm.engine.test.junit5.ProcessEngineExtension;
 import org.camunda.bpm.engine.test.mock.Mocks;
@@ -19,6 +20,7 @@ import static io.holunda.camunda.bpm.data.CamundaBpmData.reader;
 import static io.muenchendigital.digiwf.task.TaskVariables.TASK_CANCELABLE;
 import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.assertThat;
 import static org.camunda.bpm.engine.test.assertions.bpmn.BpmnAwareTests.task;
+import static org.mockito.Mockito.mock;
 
 class CancelableTaskStatusCreateTaskListenerTest {
 
@@ -28,14 +30,16 @@ class CancelableTaskStatusCreateTaskListenerTest {
       .useProcessEngine(
           ProcessEngineConfiguration
               .createStandaloneInMemProcessEngineConfiguration()
-              .setJdbcUrl("jdbc:h2:mem:camunda;DB_CLOSE_DELAY=1000")
+              .setHistory("none")
+              .setJdbcUrl("jdbc:h2:mem:camunda;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;")
+              .setSkipHistoryOptimisticLockingExceptions(true)
+              .setTelemetryRegistry(mock(TelemetryRegistry.class))
               .buildProcessEngine()
       )
+      .ensureCleanAfterTest(true)
       .build();
-
   private final RuntimeService runtimeService = extension.getRuntimeService();
   private final TaskService taskService = extension.getTaskService();
-
 
   @BeforeEach
   void init_bridge() {
