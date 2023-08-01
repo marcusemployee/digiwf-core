@@ -37,6 +37,7 @@
         <module>digiwf-gateway</module>
         <module>digiwf-process</module>
         <module>digiwf-schema-registry</module>
+        <module>digiwf-task</module>
     </modules>
 
     <dependencyManagement>
