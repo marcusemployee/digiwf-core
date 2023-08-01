@@ -32,7 +32,6 @@
     </properties>
 
     <modules>
-        <module>digiwf-libs</module>
         <module>digiwf-coverage</module>
     </modules>
 
