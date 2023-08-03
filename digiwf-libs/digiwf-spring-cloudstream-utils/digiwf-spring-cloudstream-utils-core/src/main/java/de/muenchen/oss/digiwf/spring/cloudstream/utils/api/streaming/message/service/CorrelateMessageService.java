@@ -1,7 +1,7 @@
 package de.muenchen.oss.digiwf.spring.cloudstream.utils.api.streaming.message.service;
 
 import de.muenchen.oss.digiwf.spring.cloudstream.utils.api.streaming.infrastructure.StreamingHeaders;
-import io.muenchendigital.digiwf.connector.api.message.CorrelateMessageEvent;
+import de.muenchen.oss.digiwf.connector.api.message.CorrelateMessageEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;
