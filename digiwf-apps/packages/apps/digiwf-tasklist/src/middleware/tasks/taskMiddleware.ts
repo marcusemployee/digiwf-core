@@ -39,7 +39,13 @@ import {queryClient} from "../queryClient";
 import store from "../../store";
 import {getUserInfo} from "../user/userMiddleware";
 import {PageOfTasks, Task} from "@muenchen/digiwf-task-api-internal";
-import {addFinishedTaskIds, isInFinishedProcess} from "./finishedTaskFilter";
+import {
+  addAssignedTaskIds,
+  addFinishedTaskIds,
+  isInAssignedProcesses,
+  isInFinishedProcesses
+} from "./mutatedTaskFilter";
+import tasks from "../../views/Tasks.vue";
 
 if (shouldUseTaskService()) {
   console.log("feature toggle enabled. New tasklist service is used for network requests.");
@@ -57,7 +63,7 @@ const addUserToTask = (r: Task): Promise<HumanTask> => {
       ? getUserInfo(r.assignee)
       : Promise.resolve(undefined)
   )
-    .then(user => Promise.resolve(mapTaskFromTaskService(r, isInFinishedProcess(r.id), user)));
+    .then(user => Promise.resolve(mapTaskFromTaskService(r, isInFinishedProcesses(r.id), isInAssignedProcesses(r.id), user)));
 };
 
 const handlePageOfTaskResponse = (response: PageOfTasks) => {
@@ -172,7 +178,7 @@ export const useNumberOfTasks = (): UseNumberOfTasksReturn => {
   };
 };
 
-export const useAssignTaskMutation = () => {
+export const useAssignTaskToCurrentUserMutation = () => {
   const queryClient = useQueryClient();
 
   const lhmObjectId = (useStore().state as any).user?.info?.lhmObjectId;
@@ -182,10 +188,30 @@ export const useAssignTaskMutation = () => {
         ? callPostAssignTaskInTaskService(taskId, lhmObjectId)
         : callPostAssignTaskInEngine(taskId);
     },
-    onSuccess: () => {
+    onSuccess: (_, taskId) => {
+      addAssignedTaskIds(taskId);
       queryClient.invalidateQueries(["user-tasks"]);
       queryClient.invalidateQueries(["assigned-group-tasks"]);
       queryClient.invalidateQueries(["open-group-tasks"]);
+    },
+  });
+};
+
+export const useAssignTaskToUserMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, any, { taskId: string, userId: string }>({
+    mutationFn: ({taskId, userId}) => {
+      return shouldUseTaskService()
+        ? callPostAssignTaskInTaskService(taskId, userId)
+        : callPostAssignTaskInEngine(taskId);
+    },
+    onSuccess: (_, variables) => {
+      addAssignedTaskIds(variables.taskId);
+      queryClient.invalidateQueries(["user-tasks"]);
+      queryClient.invalidateQueries(["assigned-group-tasks"]);
+      queryClient.invalidateQueries(["open-group-tasks"]);
+
     },
   });
 };
@@ -233,7 +259,7 @@ const loadTaskFromTaskService = (taskId: string): Promise<LoadTaskResult> => {
           ? getUserInfo(taskResponse.assignee)
           : Promise.resolve<undefined>(undefined)
       ).then((user) => {
-        const taskDetails = mapTaskDetailsFromTaskService(taskResponse, isInFinishedProcess(taskId), user);
+        const taskDetails = mapTaskDetailsFromTaskService(taskResponse, isInFinishedProcesses(taskId), isInAssignedProcesses(taskId), user);
         return Promise.resolve<LoadTaskResult>({
           data: {
             task: taskDetails,
