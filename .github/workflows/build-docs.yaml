@@ -1,20 +1,22 @@
-name: build apps
+name: build docs
 
 on:
   push:
     branches:
       - '**'
     paths:
-      - 'digiwf-apps/**'
+      - 'docs/**'
   pull_request:
     types: [ opened, reopened ]
+    paths:
+      - 'docs/**'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./digiwf-apps
+        working-directory: ./docs
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
@@ -22,6 +24,5 @@ jobs:
           node-version: '16'
           cache: 'npm'
           cache-dependency-path: "./digiwf-apps/package-lock.json"
-      - run: npm run init
-      - run: npm run test
+      - run: npm install
       - run: npm run build
