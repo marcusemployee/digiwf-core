@@ -12,9 +12,11 @@ import de.muenchen.oss.digiwf.dms.integration.application.port.in.CreateProcedur
 import de.muenchen.oss.digiwf.dms.integration.application.port.in.DepositObjectUseCase;
 import de.muenchen.oss.digiwf.dms.integration.application.port.out.*;
 import de.muenchen.oss.digiwf.dms.integration.application.service.CancelObjectService;
+import de.muenchen.oss.digiwf.dms.integration.application.port.in.UpdateDocumentUseCase;
 import de.muenchen.oss.digiwf.dms.integration.application.service.CreateDocumentService;
 import de.muenchen.oss.digiwf.dms.integration.application.service.CreateProcedureService;
 import de.muenchen.oss.digiwf.dms.integration.application.service.DepositObjectService;
+import de.muenchen.oss.digiwf.dms.integration.application.service.UpdateDocumentService;
 import de.muenchen.oss.digiwf.message.process.api.ErrorApi;
 import de.muenchen.oss.digiwf.message.process.api.ProcessApi;
 import de.muenchen.oss.digiwf.s3.integration.client.repository.DocumentStorageFileRepository;
@@ -63,6 +65,12 @@ public class DmsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public UpdateDocumentUseCase updateDocumentUseCase(final UpdateDocumentPort updateDocumentPort, LoadFilePort loadFilePort) {
+        return new UpdateDocumentService(updateDocumentPort, loadFilePort);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public DepositObjectUseCase depositObjectUseCase(DepositObjectPort depositObjectPort) {
         return new DepositObjectService(depositObjectPort);
     }
@@ -84,6 +92,11 @@ public class DmsAutoConfiguration {
     }
 
     @Bean
+    public Consumer<Message<UpdateDocumentDto>> updateDocumentMessageProcessor(final MessageProcessor messageProcessor) {
+        return messageProcessor.updateDocument();
+    }
+
+    @Bean
     public Consumer<Message<DepositObjectDto>> depositObjectMessageProcessor(final MessageProcessor messageProcessor) {
         return messageProcessor.depositObject();
     }
@@ -100,6 +113,7 @@ public class DmsAutoConfiguration {
             final ErrorApi errorApi,
             final CreateProcedureUseCase createProcedureUseCase,
             final CreateDocumentUseCase createDocumentUseCase,
+            final UpdateDocumentUseCase updateDocumentUseCase,
             final DepositObjectUseCase depositObjectUseCase,
             final CancelObjectUseCase cancelObjectUseCase) {
         return new MessageProcessor(
@@ -107,6 +121,7 @@ public class DmsAutoConfiguration {
                 errorApi,
                 createProcedureUseCase,
                 createDocumentUseCase,
+                updateDocumentUseCase,
                 depositObjectUseCase,
                 cancelObjectUseCase);
     }

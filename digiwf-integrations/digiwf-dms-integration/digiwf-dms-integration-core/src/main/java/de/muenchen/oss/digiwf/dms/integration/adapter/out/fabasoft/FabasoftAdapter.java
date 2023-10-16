@@ -5,8 +5,10 @@ import de.muenchen.oss.digiwf.dms.integration.application.port.out.CancelObjectP
 import de.muenchen.oss.digiwf.dms.integration.application.port.out.CreateDocumentPort;
 import de.muenchen.oss.digiwf.dms.integration.application.port.out.CreateProcedurePort;
 import de.muenchen.oss.digiwf.dms.integration.application.port.out.DepositObjectPort;
+import de.muenchen.oss.digiwf.dms.integration.application.port.out.UpdateDocumentPort;
 import de.muenchen.oss.digiwf.dms.integration.domain.Content;
 import de.muenchen.oss.digiwf.dms.integration.domain.Document;
+import de.muenchen.oss.digiwf.dms.integration.domain.DocumentType;
 import de.muenchen.oss.digiwf.dms.integration.domain.Procedure;
 import de.muenchen.oss.digiwf.message.process.api.error.IncidentError;
 import lombok.RequiredArgsConstructor;
@@ -16,11 +18,7 @@ import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
-public class FabasoftAdapter implements
-        CreateProcedurePort,
-        CreateDocumentPort,
-        DepositObjectPort,
-        CancelObjectPort {
+public class FabasoftAdapter implements CreateProcedurePort, CreateDocumentPort, UpdateDocumentPort, DepositObjectPort, CancelObjectPort {
 
     private final FabasoftProperties properties;
     private final LHMBAI151700GIWSDSoap wsClient;
@@ -49,15 +47,8 @@ public class FabasoftAdapter implements
         return new Procedure(response.getObjid(), procedure.getFileCOO(), procedure.getTitle());
     }
 
+    @Override
     public String createDocument(final Document document, final String user) {
-        //logging for dms team
-        log.info("calling CreateIncomingGI"
-                + " Userlogin: " + user
-                + " Referrednumber: " + document.getProcedureCOO()
-                + " Shortname: " + document.getTitle()
-                + " Filesubj: " + document.getTitle()
-        );
-
         switch (document.getType()) {
             case EINGEHEND:
                 return this.createIncomingDocument(document, user);
@@ -71,6 +62,14 @@ public class FabasoftAdapter implements
     }
 
     private String createIncomingDocument(final Document document, final String user) {
+        //logging for dms team
+        log.info("calling CreateIncomingGI"
+                + " Userlogin: " + user
+                + " Referrednumber: " + document.getProcedureCOO()
+                + " Shortname: " + document.getTitle()
+                + " Filesubj: " + document.getTitle()
+        );
+
         final CreateIncomingGI request = new CreateIncomingGI();
         request.setUserlogin(user);
         request.setReferrednumber(document.getProcedureCOO());
@@ -95,6 +94,14 @@ public class FabasoftAdapter implements
     }
 
     private String createOutgoingDocument(final Document document, final String user) {
+        //logging for dms team
+        log.info("calling CreateOutgoingGI"
+                + " Userlogin: " + user
+                + " Referrednumber: " + document.getProcedureCOO()
+                + " Shortname: " + document.getTitle()
+                + " Filesubj: " + document.getTitle()
+        );
+
         final CreateOutgoingGI request = new CreateOutgoingGI();
         request.setUserlogin(user);
         request.setReferrednumber(document.getProcedureCOO());
@@ -122,6 +129,14 @@ public class FabasoftAdapter implements
     }
 
     private String createInternalDocument(final Document document, final String user) {
+        //logging for dms team
+        log.info("calling CreateInternalGI"
+                + " Userlogin: " + user
+                + " Referrednumber: " + document.getProcedureCOO()
+                + " Shortname: " + document.getTitle()
+                + " Filesubj: " + document.getTitle()
+        );
+
         final CreateInternalGI request = new CreateInternalGI();
         request.setUserlogin(user);
         request.setReferrednumber(document.getProcedureCOO());
@@ -144,6 +159,90 @@ public class FabasoftAdapter implements
 
         return response.getObjid();
     }
+
+    @Override
+    public void updateDocument(final String documentCOO, final DocumentType type, final List<Content> contents, final String user) {
+        switch (type) {
+            case EINGEHEND:
+                this.updateIncomingDocument(documentCOO, contents, user);
+                return;
+            case AUSGEHEND:
+                this.updateOutgoingDocument(documentCOO, contents, user);
+                return;
+            case INTERN:
+                this.updateInternalDocument(documentCOO, contents, user);
+                return;
+            default:
+                throw new AssertionError("must not happen");
+        }
+    }
+
+    private void updateIncomingDocument(final String documentCOO, final List<Content> contents, final String user) {
+        log.info("calling UpdateIncomingGI: " + documentCOO);
+
+        final UpdateIncomingGI request = new UpdateIncomingGI();
+        request.setUserlogin(user);
+        request.setObjaddress(documentCOO);
+        request.setBusinessapp(this.properties.getBusinessapp());
+
+        final ArrayOfLHMBAI151700GIAttachmentType attachmentType = new ArrayOfLHMBAI151700GIAttachmentType();
+        final List<LHMBAI151700GIAttachmentType> files = attachmentType.getLHMBAI151700GIAttachmentType();
+
+        for (final Content content : contents) {
+            files.add(this.parseContent(content));
+        }
+
+        request.setGiattachmenttype(attachmentType);
+
+        final UpdateIncomingGIResponse response = this.wsClient.updateIncomingGI(request);
+
+        dmsErrorHandler.handleError(response.getStatus(), response.getErrormessage());
+    }
+
+    private void updateOutgoingDocument(final String documentCOO, final List<Content> contents, final String user) {
+        log.info("calling UpdateOutgoingGI: " + documentCOO);
+
+        final UpdateOutgoingGI request = new UpdateOutgoingGI();
+        request.setUserlogin(user);
+        request.setObjaddress(documentCOO);
+        request.setBusinessapp(this.properties.getBusinessapp());
+
+        final ArrayOfLHMBAI151700GIAttachmentType attachmentType = new ArrayOfLHMBAI151700GIAttachmentType();
+        final List<LHMBAI151700GIAttachmentType> files = attachmentType.getLHMBAI151700GIAttachmentType();
+
+        for (final Content content : contents) {
+            files.add(this.parseContent(content));
+        }
+
+        request.setGiattachmenttype(attachmentType);
+
+        final UpdateOutgoingGIResponse response = this.wsClient.updateOutgoingGI(request);
+
+        dmsErrorHandler.handleError(response.getStatus(), response.getErrormessage());
+    }
+
+    private void updateInternalDocument(final String documentCOO, final List<Content> contents, final String user) {
+        log.info("calling UpdateInternalGI: " + documentCOO);
+
+        final UpdateInternalGI request = new UpdateInternalGI();
+        request.setUserlogin(user);
+        request.setObjaddress(documentCOO);
+        request.setBusinessapp(this.properties.getBusinessapp());
+
+        final ArrayOfLHMBAI151700GIAttachmentType attachmentType = new ArrayOfLHMBAI151700GIAttachmentType();
+        final List<LHMBAI151700GIAttachmentType> files = attachmentType.getLHMBAI151700GIAttachmentType();
+
+        for (final Content content : contents) {
+            files.add(this.parseContent(content));
+        }
+
+        request.setGiattachmenttype(attachmentType);
+
+        final UpdateInternalGIResponse response = this.wsClient.updateInternalGI(request);
+
+        dmsErrorHandler.handleError(response.getStatus(), response.getErrormessage());
+    }
+
 
     @Override
     public void depositObject(String objectCoo, String user) {
