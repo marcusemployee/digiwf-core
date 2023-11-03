@@ -24,6 +24,14 @@
       <v-spacer/>
       <span v-if="appInfo !== null">{{ appInfo.environment }}</span>
       <v-spacer/>
+      <v-btn
+        icon
+        aria-label="Tastaturbedienungsanleitung öffnen"
+        @click="openKeyBindingsDialoge"
+      >
+        <v-icon>mdi-keyboard</v-icon>
+      </v-btn>
+
       {{ username }}
 
       <v-menu offset-y>
@@ -103,6 +111,10 @@
           </v-btn>
         </template>
       </v-banner>
+      <app-key-bindings-dialog
+        :value="showKeyBindingsModal"
+        @close="closeKeyBindingsDialoge"
+      />
       <v-container fluid>
         <v-fade-transition mode="out-in">
           <router-view/>
@@ -189,12 +201,13 @@ import Vue from "vue";
 import {Component, Watch} from "vue-property-decorator";
 import {InfoTO, ServiceInstanceTO, UserTO,} from "@muenchen/digiwf-engine-api-internal";
 import AppMenuList from "./components/UI/appMenu/AppMenuList.vue";
+import AppKeyBindingsDialog from "./components/UI/help/AppKeyBindingsDialog.vue";
 import {apiGatewayUrl} from "./utils/envVariables";
 import {queryClient} from "./middleware/queryClient";
 import ContrastModeSelection from "./components/UI/ContrastModeSelection.vue";
 
 @Component({
-  components: {ContrastModeSelection, AppMenuList}
+  components: {AppKeyBindingsDialog, ContrastModeSelection, AppMenuList}
 })
 export default class App extends Vue {
   drawer = true;
@@ -203,6 +216,7 @@ export default class App extends Vue {
   appInfo: InfoTO | null = null;
   loginLoading = false;
   loggedIn = true;
+  showKeyBindingsModal = false;
 
   created(): void {
     this.loadData();
@@ -253,6 +267,14 @@ export default class App extends Vue {
         queryClient.refetchQueries();
       }
     }, 1000);
+  }
+
+  openKeyBindingsDialoge(): void {
+    this.showKeyBindingsModal = true;
+  }
+
+  closeKeyBindingsDialoge(): void {
+    this.showKeyBindingsModal = false;
   }
 }
 </script>

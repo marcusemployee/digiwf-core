@@ -9,6 +9,7 @@ declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     AppJsonForm: typeof import('./src/components/schema/AppJsonForm.vue')['default']
     AppJsonRenderer: typeof import('./src/components/schema/AppJsonRenderer.vue')['default']
+    AppKeyBindingsDialog: typeof import('./src/components/UI/help/AppKeyBindingsDialog.vue')['default']
     AppLoadingButton: typeof import('./src/components/UI/AppLoadingButton.vue')['default']
     AppMenuItem: typeof import('./src/components/UI/appMenu/AppMenuItem.vue')['default']
     AppMenuList: typeof import('./src/components/UI/appMenu/AppMenuList.vue')['default']
@@ -30,6 +31,7 @@ declare module '@vue/runtime-core' {
     GroupTaskItem: typeof import('./src/components/task/GroupTaskItem.vue')['default']
     HighContrastIcon: typeof import('./src/components/UI/icons/HighContrastIcon.vue')['default']
     ImageOutput: typeof import('./src/components/form/ImageOutput.vue')['default']
+    KeyBindingLine: typeof import('./src/components/UI/help/KeyBindingLine.vue')['default']
     LoadingFab: typeof import('./src/components/UI/LoadingFab.vue')['default']
     PdfOutput: typeof import('./src/components/form/PdfOutput.vue')['default']
     ProcessDefinitionItem: typeof import('./src/components/process/ProcessDefinitionItem.vue')['default']
