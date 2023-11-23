@@ -46,7 +46,7 @@
         </dependency>
         <dependency>
             <groupId>de.muenchen.oss.digiwf</groupId>
-            <artifactId>digiwf-logging</artifactId>
+            <artifactId>digiwf-spring-logging-and-tracing</artifactId>
         </dependency>
 
         <!-- Security -->

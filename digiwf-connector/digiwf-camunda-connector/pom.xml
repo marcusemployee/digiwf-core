@@ -36,10 +36,12 @@
         <dependency>
             <groupId>org.camunda.community</groupId>
             <artifactId>camunda-engine-rest-client-openapi-java</artifactId>
+            <version>${camunda-engine-rest-client-openapi-java.version}</version>
         </dependency>
         <dependency>
             <groupId>org.camunda.bpm</groupId>
             <artifactId>camunda-external-task-client-spring</artifactId>
+            <version>${camunda.version}</version>
         </dependency>
 
         <!-- DigiWF -->
@@ -82,6 +84,7 @@
         <dependency>
             <groupId>org.camunda.bpm</groupId>
             <artifactId>camunda-bpm-junit5</artifactId>
+            <version>${camunda.version}</version>
             <scope>test</scope>
         </dependency>
 

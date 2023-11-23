@@ -12,6 +12,10 @@
     <name>digiwf-engine-cockpit</name>
     <packaging>jar</packaging>
 
+    <properties>
+        <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
+
     <dependencies>
         <!-- DigiWF -->
         <dependency>
@@ -26,6 +30,36 @@
             <artifactId>camunda-bpm-spring-boot-starter-rest</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.camunda.bpm</groupId>
+            <artifactId>camunda-engine</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
+    <profiles>
+        <profile>
+            <id>camunda-ce</id>
+            <activation>
+                <property>
+                    <name>!camunda-ee</name>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.camunda.bpm.springboot</groupId>
+                    <artifactId>camunda-bpm-spring-boot-starter-webapp</artifactId>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>camunda-ee</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.camunda.bpm.springboot</groupId>
+                    <artifactId>camunda-bpm-spring-boot-starter-webapp-ee</artifactId>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>

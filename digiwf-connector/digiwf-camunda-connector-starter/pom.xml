@@ -66,11 +66,13 @@
         <dependency>
             <groupId>org.camunda.community</groupId>
             <artifactId>camunda-engine-rest-client-openapi-springboot</artifactId>
+            <version>${camunda-engine-rest-client-openapi-java.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.camunda.bpm.springboot</groupId>
             <artifactId>camunda-bpm-spring-boot-starter-external-task-client</artifactId>
+            <version>${camunda.version}</version>
         </dependency>
     </dependencies>
 
