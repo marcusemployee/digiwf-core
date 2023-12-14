@@ -1,4 +1,4 @@
-package de.muenchen.oss.digiwf.okewo.integration;
+package de.muenchen.oss.digiwf.integration.e2e.test;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -28,6 +28,10 @@ public class TestMessageConsumer {
 
     public Map<String, Object> receiveMessage(final String processInstanceId) {
         return receivedMessages.get(processInstanceId);
+    }
+
+    public boolean hasReceivedMessage(final String processInstanceId) {
+        return receivedMessages.containsKey(processInstanceId);
     }
 
 }
