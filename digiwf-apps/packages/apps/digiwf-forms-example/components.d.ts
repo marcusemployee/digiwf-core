@@ -12,5 +12,6 @@ declare module 'vue' {
     VTab: typeof import('vuetify/lib')['VTab']
     VTabItem: typeof import('vuetify/lib')['VTabItem']
     VTabs: typeof import('vuetify/lib')['VTabs']
+    VTextField: typeof import('vuetify/lib')['VTextField']
   }
 }
