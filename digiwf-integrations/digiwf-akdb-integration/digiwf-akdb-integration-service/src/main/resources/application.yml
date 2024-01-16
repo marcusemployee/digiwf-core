@@ -48,4 +48,4 @@ io:
         correlateMessageDestination: "dwf-connector-local-01"
 
 server:
-  port: 8088
+  port: 8089
