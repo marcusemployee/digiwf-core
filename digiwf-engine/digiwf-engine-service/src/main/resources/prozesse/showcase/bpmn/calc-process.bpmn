@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_02m23tv" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.9.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.15.0">
+  <bpmn:collaboration id="Collaboration_0e6ak52">
+    <bpmn:extensionElements />
+    <bpmn:participant id="Participant_1nz00x0" name="Calculation Showcase" processRef="Calc-Showcase" />
+  </bpmn:collaboration>
+  <bpmn:process id="Calc-Showcase" name="Calc Showcase" isExecutable="true" camunda:historyTimeToLive="P1D">
+    <bpmn:startEvent id="Start_Form" name="Started" camunda:formKey="start-form-calc">
+      <bpmn:outgoing>Flow_0lnd3z6</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_0lnd3z6" sourceRef="Start_Form" targetRef="Activity_0g2uezd" />
+    <bpmn:sequenceFlow id="Flow_091qwfe" sourceRef="Task_UserTask" targetRef="End_completed" />
+    <bpmn:userTask id="Task_UserTask" name="Ergebnis prüfen" camunda:modelerTemplate="de.muenchen.digiwf.templates.Usertask" camunda:assignee="${FORMFIELD_User}">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="app_task_description" />
+          <camunda:inputParameter name="app_notification_send_candidate_groups">false</camunda:inputParameter>
+          <camunda:inputParameter name="app_notification_send_candidate_users">false</camunda:inputParameter>
+          <camunda:inputParameter name="app_notification_send_assignee">false</camunda:inputParameter>
+          <camunda:inputParameter name="app_assign_user_to_processinstance">false</camunda:inputParameter>
+          <camunda:inputParameter name="app_file_paths" />
+          <camunda:inputParameter name="app_file_paths_readonly" />
+          <camunda:inputParameter name="app_task_tag">example-task</camunda:inputParameter>
+          <camunda:inputParameter name="app_task_schema_key">ergebnis-pruefen</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0cqz845</bpmn:incoming>
+      <bpmn:outgoing>Flow_091qwfe</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="End_completed" name="Ended">
+      <bpmn:extensionElements>
+        <camunda:executionListener event="start">
+          <camunda:script scriptFormat="Javascript">process.setStatus("finished");</camunda:script>
+        </camunda:executionListener>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_091qwfe</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0cqz845" sourceRef="Activity_0g2uezd" targetRef="Task_UserTask" />
+    <bpmn:callActivity id="Activity_0g2uezd" name="Nummer berechnen" camunda:modelerTemplate="de.muenchen.digitalwf.templates.calc-value" calledElement="StreamingTemplateV02">
+      <bpmn:extensionElements>
+        <camunda:in sourceExpression="digiwf-akdb-integration-local-01" target="app_topic_name" />
+        <camunda:in sourceExpression="genericEvent" target="app_message_name" />
+        <camunda:in sourceExpression="calcNumber" target="app_type_name" />
+        <camunda:in sourceExpression="${numberToCalc}" target="number" />
+        <camunda:out source="erg" target="ergebnis" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0lnd3z6</bpmn:incoming>
+      <bpmn:outgoing>Flow_0cqz845</bpmn:outgoing>
+    </bpmn:callActivity>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_test-prozess">
+    <bpmndi:BPMNPlane id="BPMNPlane_test-prozess" bpmnElement="Collaboration_0e6ak52">
+      <bpmndi:BPMNShape id="Participant_1nz00x0_di" bpmnElement="Participant_1nz00x0" isHorizontal="true" isExpanded="true">
+        <dc:Bounds x="152" y="80" width="618" height="350" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1acjyv3_di" bpmnElement="Start_Form">
+        <dc:Bounds x="252" y="222" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="254" y="265" width="36" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0kt76qk_di" bpmnElement="Task_UserTask">
+        <dc:Bounds x="480" y="200" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_17q2n00_di" bpmnElement="End_completed">
+        <dc:Bounds x="632" y="222" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="635" y="265" width="32" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0i52phk_di" bpmnElement="Activity_0g2uezd">
+        <dc:Bounds x="330" y="200" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0lnd3z6_di" bpmnElement="Flow_0lnd3z6">
+        <di:waypoint x="288" y="240" />
+        <di:waypoint x="330" y="240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_091qwfe_di" bpmnElement="Flow_091qwfe">
+        <di:waypoint x="580" y="240" />
+        <di:waypoint x="632" y="240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0cqz845_di" bpmnElement="Flow_0cqz845">
+        <di:waypoint x="430" y="240" />
+        <di:waypoint x="480" y="240" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

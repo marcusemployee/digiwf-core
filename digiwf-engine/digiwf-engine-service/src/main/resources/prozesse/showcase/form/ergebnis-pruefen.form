@@ -1,0 +1,51 @@
+{
+    "key": "ergebnis-pruefen",
+    "schema": {
+        "type": "object",
+        "x-display": "",
+        "allOf": [
+            {
+                "key": "sectionKey1",
+                "title": "Erster Abschnitt",
+                "type": "object",
+                "x-options": {
+                    "sectionsTitlesClasses": [
+                        "d-none"
+                    ]
+                },
+                "allOf": [
+                    {
+                        "containerType": "group",
+                        "title": "Group",
+                        "description": "",
+                        "x-options": {
+                            "childrenClass": "pl-0"
+                        },
+                        "properties": {
+                            "ergebnis": {
+                                "fieldType": "integer",
+                                "title": "Ergebnis",
+                                "type": "integer",
+                                "key": "ergebnis",
+                                "readOnly": true,
+                                "x-options": {
+                                    "fieldColProps": {
+                                        "cols": 12,
+                                        "sm": 12,
+                                        "messages": {}
+                                    }
+                                },
+                                "x-props": {
+                                    "outlined": true,
+                                    "dense": true
+                                },
+                                "x-rules": []
+                            }
+                        },
+                        "key": "1cabb782-f707-4041-aa4b-1cfc06c5864c"
+                    }
+                ]
+            }
+        ]
+    }
+}
